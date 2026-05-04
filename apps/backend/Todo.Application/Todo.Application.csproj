@@ -4,6 +4,12 @@
     <ProjectReference Include="..\Todo.Core\Todo.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Commands\" />
+    <Folder Include="Exceptions\" />
+    <Folder Include="Quaries\" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
