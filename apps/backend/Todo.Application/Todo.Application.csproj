@@ -5,12 +5,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\" />
-    <Folder Include="Exceptions\" />
-    <Folder Include="Quaries\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.9" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.15" />
     <PackageReference Include="Scrutor" Version="7.0.0" />
