@@ -11,7 +11,7 @@ using Todo.Infrastructure.Time;
 
 namespace Todo.Infrastructure;
 
-internal static class Extensions
+public static class Extensions
 {
     private const string SectionName = "app";
     
