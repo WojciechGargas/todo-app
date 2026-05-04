@@ -13,7 +13,7 @@ public class Authenticator(IOptions<AuthOptions> options, IClock clock) : IAuthe
 {
     private readonly string _issuer = options.Value.Issuer;
     private readonly string _audience = options.Value.Audience;
-    private readonly TimeSpan _expiration = options.Value.Expiration ??  TimeSpan.FromHours(1);
+    private readonly TimeSpan _expiration = options.Value.Expiry ??  TimeSpan.FromHours(1);
     private readonly SigningCredentials _signingCredentials = new(
         new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Value.SigningKey)),
         SecurityAlgorithms.HmacSha256);

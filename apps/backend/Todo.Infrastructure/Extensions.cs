@@ -22,6 +22,7 @@ public static class Extensions
         var infrastructureAssembly = typeof(AppOptions).Assembly;
 
         services.Configure<AppOptions>(section)
+            .AddScoped<ExceptionMiddleware>()
             .AddSecurity()
             .AddAuth(configuration)
             .AddPostgres(configuration)
