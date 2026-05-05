@@ -9,7 +9,7 @@ namespace Todo.Infrastructure.DAL.Configurations;
 
 internal sealed class TodoTaskConfiguration : IEntityTypeConfiguration<TodoTask>
 {
-    private static readonly ValueComparer<List<UserId>> SharedWithComparer = new(
+    private static readonly ValueComparer<IReadOnlyCollection<UserId>> SharedWithComparer = new(
         (left, right) => left!.SequenceEqual(right!),
         value => value.Aggregate(0, (hash, id) => HashCode.Combine(hash, id.GetHashCode())),
         value => value.Select(x => new UserId(x.Value)).ToList());
@@ -39,14 +39,15 @@ internal sealed class TodoTaskConfiguration : IEntityTypeConfiguration<TodoTask>
 
         builder.Property(x => x.IsCompleted).IsRequired();
 
-        builder.Property<List<UserId>>("_sharedWithUserIds")
+        builder.Property(x => x.SharedWithUserIds)
+            .HasField("_sharedWithUserIds")
             .UsePropertyAccessMode(PropertyAccessMode.Field)
             .HasColumnName("shared_with_user_ids")
             .HasColumnType("text")
             .HasConversion(
                 value => JsonSerializer.Serialize(value.Select(id => id.Value).ToList(), (JsonSerializerOptions?)null),
                 value => string.IsNullOrWhiteSpace(value)
-                    ? new List<UserId>()
+                    ? (IReadOnlyCollection<UserId>)new List<UserId>()
                     : JsonSerializer.Deserialize<List<Guid>>(value, (JsonSerializerOptions?)null)!
                         .Select(id => new UserId(id))
                         .ToList())

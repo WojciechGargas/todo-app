@@ -19,8 +19,6 @@ public class UsersController(
     public async Task<ActionResult<UserDto>> GetUser([FromRoute] Guid userId)
     {
         var user = await getUserHandler.HandleAsync(new GetUser{ UserId = userId });
-        if (user is null)
-            return NotFound();
         
         return user;
     }
