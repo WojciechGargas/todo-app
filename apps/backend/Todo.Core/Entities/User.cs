@@ -43,4 +43,7 @@ public class User
 
     public void ChangeFullName(string newFullname)
         => FullName = new FullName(newFullname);
+    
+    public void ChangeEmail(string newEmail)
+        => Email = new Email(newEmail);
 }

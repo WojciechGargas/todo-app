@@ -11,7 +11,8 @@ namespace Todo.Api.Controllers;
 [Route("[controller]")]
 
 public class ProfileController(
-    ICommandHandler<ChangeFullname> changeFullnameHandler)
+    ICommandHandler<ChangeFullname> changeFullnameHandler,
+    ICommandHandler<ChangeEmail> changeEmailHandler)
     : ControllerBase
 {
     [HttpPatch("profile/changeFullname")]
@@ -22,6 +23,16 @@ public class ProfileController(
         await changeFullnameHandler.HandleAsync(new ChangeFullname(userId, request.NewFullname));
         
         return NoContent();
+    }
+
+    [HttpPatch("profile/changeEmail")]
+    public async Task<ActionResult> ChangeEmail(ChangeEmailRequest request)
+    {
+        var userId = GetUserId();
+        
+        await changeEmailHandler.HandleAsync(new ChangeEmail(userId, request.NewEmail));
+        
+        return  NoContent();
     }
     
     private Guid GetUserId()
