@@ -24,6 +24,8 @@ internal sealed class SignInHandler(
             throw new InvalidCredentialException();
         }
         
+        //todo: see if u want to mark as logged in
+        
         var jwt = authenticator.CreateToken(user.UserId, user.Role.ToString());
         
         tokenStorage.Set(jwt);

@@ -17,6 +17,18 @@ public class User
     public DateTime? LastLoggedAtUtc { get; private set; }
     public IReadOnlyList<TaskId> TaskIds => _taskIds;
 
+    public User(UserId userId, Email email, Username username, Password password,
+        FullName fullName, UserRole role, DateTime createdAt)
+    {
+        UserId = userId;
+        Email = email;
+        Username = username;
+        Password = password;
+        FullName = fullName;
+        Role = role;
+        CreatedAt = createdAt;
+    }
+    
     public void AddTask(TaskId taskId)
     {
         if (_taskIds.Contains(taskId)) return;
