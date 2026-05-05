@@ -11,6 +11,7 @@ namespace Todo.Api.Controllers;
 
 public class UsersController(
     IQueryHandler<GetUser, UserDto> getUserHandler,
+    IQueryHandler<GetUserWithTasks, UserWithTasksDto> getUserWithTasksHandler,
     IQueryHandler<GetUsers,  IEnumerable<UserDto>> getUsersHandler) 
     : ControllerBase
 {
@@ -24,8 +25,16 @@ public class UsersController(
         return user;
     }
 
+    [HttpGet("{UserId:guid}/tasks")]
+    public async Task<ActionResult<UserWithTasksDto>> GetUserWithTasks([FromRoute] Guid userId)
+    {
+        var user = await getUserWithTasksHandler.HandleAsync(new GetUserWithTasks{ UserId = userId });
+
+        return user;
+    }
+
     [HttpGet("all")]
-    public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers([FromRoute] GetUsers query)
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers(GetUsers query)
     {
         return Ok(await getUsersHandler.HandleAsync(query));
     }

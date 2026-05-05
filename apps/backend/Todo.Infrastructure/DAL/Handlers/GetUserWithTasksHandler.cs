@@ -7,20 +7,25 @@ using Todo.Core.ValueObjects;
 
 namespace Todo.Infrastructure.DAL.Handlers;
 
-internal sealed class GetUserHandler(TodoDbContext dbContext) : IQueryHandler<GetUser, UserDto>
+internal sealed class GetUserWithTasksHandler(TodoDbContext dbContext) : IQueryHandler<GetUserWithTasks, UserWithTasksDto>
 {
-    public async Task<UserDto> HandleAsync(GetUser query)
+    public async Task<UserWithTasksDto> HandleAsync(GetUserWithTasks query)
     {
         var userId = new UserId(query.UserId);
         var user = await dbContext.Users
             .AsNoTracking()
             .SingleOrDefaultAsync(u => u.UserId == userId);
-
+        
         if (user is null)
         {
             throw new UserNotFoundException(userId);
         }
 
-        return user.AsDto();
+        var usersTasks = await dbContext.TodoTasks
+            .AsNoTracking()
+            .Where(t => t.OwnerUserId == userId)
+            .ToListAsync();
+        
+        return user.AsWithTasksDto(usersTasks);
     }
 }

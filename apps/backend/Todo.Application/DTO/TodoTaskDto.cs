@@ -1,7 +1,9 @@
-﻿namespace Todo.Application.DTO;
+﻿using Todo.Core.ValueObjects;
+
+namespace Todo.Application.DTO;
 
 public record TodoTaskDto(
-    Guid Id,
+    TaskId Id,
     string Name,
     string Description,
     bool IsComplete);
