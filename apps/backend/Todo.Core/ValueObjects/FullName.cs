@@ -8,7 +8,7 @@ public sealed record FullName
 
     public FullName(string value)
     {
-        if (string.IsNullOrWhiteSpace(value) || value.Length is < 3 or < 32)
+        if (string.IsNullOrWhiteSpace(value) || value.Length is < 3 or > 32)
         {
             throw new InvalidFullNameException(value);
         }

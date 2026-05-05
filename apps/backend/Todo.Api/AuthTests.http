@@ -1,0 +1,44 @@
+@host = http://localhost:5251
+@email = test.user1@example.com
+@username = testuser1
+@password = secret123
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzYzUzZjI4Yy01ODY1LTQxZGYtOWQ0MC1iNmYxZDI3NzEwODMiLCJ1bmlxdWVfbmFtZSI6IjNjNTNmMjhjLTU4NjUtNDFkZi05ZDQwLWI2ZjFkMjc3MTA4MyIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlVzZXIiLCJuYmYiOjE3Nzc5Njg1MzQsImV4cCI6MTc3Nzk3MjEzNCwiaXNzIjoidG9kbyIsImF1ZCI6InRvZG8tYXBpIn0.m7lCHkylRNzRSRt4NSBFgwl4kAbepr100vS1-31DCRA
+
+### Sign up - default role (User)
+POST {{host}}/Auth/sign-up
+Content-Type: application/json
+Accept: application/json
+
+{
+  "userId": "00000000-0000-0000-0000-000000000000",
+  "email": "{{email}}",
+  "username": "{{username}}",
+  "password": "{{password}}",
+  "fullName": "Test",
+  "role": null
+}
+
+### Sign in
+POST {{host}}/Auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Get all users
+GET {{host}}/Users/all
+Accept: application/json
+
+### Get user by id (wklej id z poprzedniego wyniku /Users/all)
+@userId = 3c53f28c-5865-41df-9d40-b6f1d2771083
+GET {{host}}/Users/{{userId}}
+Accept: application/json
+
+### Get user with tasks by id
+GET {{host}}/Users/{{userId}}/tasks
+Accept: application/json
+

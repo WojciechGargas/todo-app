@@ -40,4 +40,7 @@ public class User
         if (!_taskIds.Contains(taskId)) return;
         _taskIds.Remove(taskId);
     }
+
+    public void ChangeFullName(string newFullname)
+        => FullName = new FullName(newFullname);
 }
