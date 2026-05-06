@@ -1,4 +1,5 @@
-﻿using Todo.Application.Abstractions;
+using Todo.Application.Abstractions;
+using Todo.Application.Email;
 using Todo.Application.Exceptions;
 using Todo.Application.Security;
 using Todo.Core.Abstractions;
@@ -6,19 +7,21 @@ using Todo.Core.Entities;
 using Todo.Core.Enums;
 using Todo.Core.Repositories;
 using Todo.Core.ValueObjects;
+using EmailAddress = Todo.Core.ValueObjects.Email;
 
 namespace Todo.Application.Commands.UserCommands.Handlers;
 
 public class SignUpHandler(
     IUserRepository userRepository,
     IPasswordManager passwordManager,
+    IEmailConfirmationService emailConfirmationService,
     IClock clock)
     : ICommandHandler<SignUp>
 {
     public async Task HandleAsync(SignUp command)
     {
         var userId = new UserId(command.UserId);
-        var email = new Email(command.Email);
+        var email = new EmailAddress(command.Email);
         var username = new Username(command.Username);
         var password = new Password(command.Password);
         var fullname = new FullName(command.FullName);
@@ -38,7 +41,7 @@ public class SignUpHandler(
         var user = new User(userId, email, username, securedPassword,
             fullname, role, clock.CurrentTimeUtc());
 
-        
         await userRepository.AddUserAsync(user);
+        await emailConfirmationService.SendRegistrationConfirmationAsync(user.UserId, user.Email);
     }
 }

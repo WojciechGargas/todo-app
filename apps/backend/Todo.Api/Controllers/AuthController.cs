@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Todo.Application.Abstractions;
+using Todo.Application.Commands.ProfileCommands;
 using Todo.Application.Commands.UserCommands;
 using Todo.Application.Security;
 
@@ -7,10 +8,10 @@ namespace Todo.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-
 public class AuthController(
     ICommandHandler<SignIn> signInHandler,
     ICommandHandler<SignUp> signUpHandler,
+    ICommandHandler<ConfirmEmail> confirmEmailHandler,
     ITokenStorage tokenStorage)
     : ControllerBase
 {
@@ -22,13 +23,20 @@ public class AuthController(
 
         return Created();
     }
-    
+
+    [HttpPost("confirm-email")]
+    public async Task<ActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
+    {
+        await confirmEmailHandler.HandleAsync(new ConfirmEmail(request.Token));
+        return NoContent();
+    }
+
     [HttpPost("sign-in")]
     public async Task<ActionResult> SignIn([FromBody] SignIn command)
     {
         await signInHandler.HandleAsync(command);
         var jwt = tokenStorage.Get();
-        
+
         return Ok(jwt);
     }
 }

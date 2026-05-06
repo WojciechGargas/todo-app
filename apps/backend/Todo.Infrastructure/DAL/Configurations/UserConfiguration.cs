@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Todo.Core.Entities;
 using Todo.Core.ValueObjects;
+using EmailAddress = Todo.Core.ValueObjects.Email;
 
 namespace Todo.Infrastructure.DAL.Configurations;
 
@@ -24,7 +25,7 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasConversion(id => id.Value, value => new UserId(value));
 
         builder.Property(x => x.Email)
-            .HasConversion(v => v.Value, value => new Email(value))
+            .HasConversion(v => v.Value, value => new EmailAddress(value))
             .HasMaxLength(60)
             .IsRequired();
 
@@ -45,6 +46,7 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(x => x.Role).IsRequired();
         builder.Property(x => x.CreatedAt).IsRequired();
+        builder.Property(x => x.IsEmailConfirmed).IsRequired();
         builder.Property(x => x.LastLoggedAtUtc);
 
         builder.Property(x => x.TaskIds)

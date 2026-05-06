@@ -19,6 +19,15 @@ Accept: application/json
   "role": null
 }
 
+### Confirm email (token z maila)
+POST {{host}}/Auth/confirm-email
+Content-Type: application/json
+Accept: application/json
+
+{
+  "token": "paste-token-from-email-link"
+}
+
 ### Sign in
 POST {{host}}/Auth/sign-in
 Content-Type: application/json
@@ -41,4 +50,3 @@ Accept: application/json
 ### Get user with tasks by id
 GET {{host}}/Users/{{userId}}/tasks
 Accept: application/json
-

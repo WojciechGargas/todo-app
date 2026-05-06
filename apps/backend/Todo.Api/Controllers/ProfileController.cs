@@ -32,7 +32,7 @@ public class ProfileController(
         
         await changeEmailHandler.HandleAsync(new ChangeEmail(userId, request.NewEmail));
         
-        return  NoContent();
+        return Accepted();
     }
     
     private Guid GetUserId()

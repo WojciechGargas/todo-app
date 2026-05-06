@@ -2,6 +2,7 @@
 using Todo.Core.Entities;
 using Todo.Core.Repositories;
 using Todo.Core.ValueObjects;
+using EmailAddress = Todo.Core.ValueObjects.Email;
 
 namespace Todo.Infrastructure.DAL.Repositories;
 
@@ -12,7 +13,7 @@ public class UserRepository(TodoDbContext dbContext) : IUserRepository
     public Task<User?> GetUserByIdAsync(UserId userId)
         => _users.SingleOrDefaultAsync(u => u.UserId == userId);
 
-    public Task<User?> GetUserByEmailAsync(Email email)
+    public Task<User?> GetUserByEmailAsync(EmailAddress email)
         =>  _users.SingleOrDefaultAsync(u => u.Email == email);
 
     public Task<User?> GetUserByUsernameAsync(Username username)
