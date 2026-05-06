@@ -59,8 +59,8 @@ internal sealed class EmailConfirmationService(
                 IssuerSigningKey = new SymmetricSecurityKey(key)
             }, out _);
 
-            var userIdRaw = principal.FindFirstValue(JwtRegisteredClaimNames.Sub);
-            var email = principal.FindFirstValue(JwtRegisteredClaimNames.Email);
+            var userIdRaw = FindClaimValue(principal, JwtRegisteredClaimNames.Sub, ClaimTypes.NameIdentifier);
+            var email = FindClaimValue(principal, JwtRegisteredClaimNames.Email, ClaimTypes.Email);
             var purposeRaw = principal.FindFirstValue("purpose");
 
             if (!Guid.TryParse(userIdRaw, out var userId) ||
@@ -80,6 +80,20 @@ internal sealed class EmailConfirmationService(
         {
             throw new InvalidEmailConfirmationTokenException();
         }
+    }
+    
+    private static string? FindClaimValue(ClaimsPrincipal principal, params string[] claimTypes)
+    {
+        foreach (var claimType in claimTypes)
+        {
+            var value = principal.FindFirstValue(claimType);
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+        }
+
+        return null;
     }
 
     private string GenerateToken(Guid userId, string email, EmailConfirmationPurpose purpose)

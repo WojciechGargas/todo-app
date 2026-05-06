@@ -12,20 +12,25 @@ Accept: application/json
 
 {
   "userId": "00000000-0000-0000-0000-000000000000",
-  "email": "{{email}}",
-  "username": "{{username}}",
-  "password": "{{password}}",
-  "fullName": "Test",
+  "email": "gargas.w@gmail.com",
+  "username": "xxx",
+  "password": "Secret123!",
+  "fullName": "xxx",
   "role": null
 }
 
-### Confirm email (token z maila)
+### Confirm email from link (token z maila)
+@confirmToken = paste-token-from-email-link
+GET {{host}}/Auth/confirm-email?token={{confirmToken}}
+Accept: application/json
+
+### Confirm email (POST)
 POST {{host}}/Auth/confirm-email
 Content-Type: application/json
 Accept: application/json
 
 {
-  "token": "paste-token-from-email-link"
+  "token": "{{confirmToken}}"
 }
 
 ### Sign in

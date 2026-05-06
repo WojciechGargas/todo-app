@@ -31,6 +31,13 @@ public class AuthController(
         return NoContent();
     }
 
+    [HttpGet("confirm-email")]
+    public async Task<ActionResult> ConfirmEmailFromLink([FromQuery] string token)
+    {
+        await confirmEmailHandler.HandleAsync(new ConfirmEmail(token));
+        return Content("Email confirmed. You can close this page.");
+    }
+
     [HttpPost("sign-in")]
     public async Task<ActionResult> SignIn([FromBody] SignIn command)
     {
