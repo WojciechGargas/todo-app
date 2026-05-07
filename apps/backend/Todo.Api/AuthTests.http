@@ -2,9 +2,8 @@
 @email = test.user1@example.com
 @username = testuser1
 @password = secret123
-@taskId = {{$guid}}
 
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzYzUzZjI4Yy01ODY1LTQxZGYtOWQ0MC1iNmYxZDI3NzEwODMiLCJ1bmlxdWVfbmFtZSI6IjNjNTNmMjhjLTU4NjUtNDFkZi05ZDQwLWI2ZjFkMjc3MTA4MyIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlVzZXIiLCJuYmYiOjE3Nzc5Njg1MzQsImV4cCI6MTc3Nzk3MjEzNCwiaXNzIjoidG9kbyIsImF1ZCI6InRvZG8tYXBpIn0.m7lCHkylRNzRSRt4NSBFgwl4kAbepr100vS1-31DCRA
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzYzUzZjI4Yy01ODY1LTQxZGYtOWQ0MC1iNmYxZDI3NzEwODMiLCJ1bmlxdWVfbmFtZSI6IjNjNTNmMjhjLTU4NjUtNDFkZi05ZDQwLWI2ZjFkMjc3MTA4MyIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlVzZXIiLCJuYmYiOjE3NzgxNDMyMTEsImV4cCI6MTc3ODE0NjgxMSwiaXNzIjoidG9kbyIsImF1ZCI6InRvZG8tYXBpIn0.lDo6LUp_cgnz5OVBooeH061tqv2Wryjn7TlJH5soRqg
 
 ### Sign up - default role (User)
 POST {{host}}/Auth/sign-up
@@ -58,19 +57,17 @@ GET {{host}}/Users/{{userId}}/tasks
 Accept: application/json
 
 ### Add task for existing verified user
-POST {{host}}/Tasks
+POST {{host}}/Tasks/addTask
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer {{token}}
 
 {
-  "id": "{{taskId}}",
-  "userId": "111594c3-5e13-409d-8e9e-d9c2f25f3131",
   "name": "Task testowy",
-  "description": "Dodany do istniejącego użytkownika"
+  "description": "Dodany dla aktualnie zalogowanego użytkownika"
 }
 
 ### Verify task is visible for user
-GET {{host}}/Users/111594c3-5e13-409d-8e9e-d9c2f25f3131/tasks
+GET {{host}}/Users/{{userId}}/tasks
 Accept: application/json
 Authorization: Bearer {{token}}

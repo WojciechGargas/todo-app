@@ -19,8 +19,8 @@ public class AddTaskHandler(
         var taskToAdd = new TodoTask(
             command.Id,
             command.UserId,
-            command.Name,
-            command.Description
+            new TaskName(command.Name),
+            new TaskDescription(command.Description)
         );
         
         await taskRepository.AddTaskAsync(taskToAdd);

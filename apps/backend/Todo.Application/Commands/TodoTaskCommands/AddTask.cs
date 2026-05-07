@@ -1,4 +1,4 @@
-﻿using Todo.Application.Abstractions;
+using Todo.Application.Abstractions;
 using Todo.Core.ValueObjects;
 
 namespace Todo.Application.Commands.TodoTaskCommands;
@@ -6,6 +6,6 @@ namespace Todo.Application.Commands.TodoTaskCommands;
 public record AddTask(
     TaskId Id,
     UserId UserId,
-    TaskName Name,
-    TaskDescription Description)
+    string Name,
+    string Description)
     : ICommand;
