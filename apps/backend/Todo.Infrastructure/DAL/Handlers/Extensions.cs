@@ -31,4 +31,13 @@ internal static class Extensions
             user.Role,
             taskDtos);
     }
+
+    public static TodoTaskDto AsDto(this TodoTask entity)
+    {
+        return new TodoTaskDto(
+            entity.TaskId,
+            entity.TaskName,
+            entity.TaskDescription,
+            entity.IsCompleted);
+    }
 }

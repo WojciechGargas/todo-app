@@ -2,8 +2,10 @@
 @email = test.user1@example.com
 @username = testuser1
 @password = secret123
+@taskId = 4f380316-bf96-439d-8f90-b3794ff14e61
 
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzYzUzZjI4Yy01ODY1LTQxZGYtOWQ0MC1iNmYxZDI3NzEwODMiLCJ1bmlxdWVfbmFtZSI6IjNjNTNmMjhjLTU4NjUtNDFkZi05ZDQwLWI2ZjFkMjc3MTA4MyIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlVzZXIiLCJuYmYiOjE3NzgxNDMyMTEsImV4cCI6MTc3ODE0NjgxMSwiaXNzIjoidG9kbyIsImF1ZCI6InRvZG8tYXBpIn0.lDo6LUp_cgnz5OVBooeH061tqv2Wryjn7TlJH5soRqg
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzYzUzZjI4Yy01ODY1LTQxZGYtOWQ0MC1iNmYxZDI3NzEwODMiLCJ1bmlxdWVfbmFtZSI6IjNjNTNmMjhjLTU4NjUtNDFkZi05ZDQwLWI2ZjFkMjc3MTA4MyIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlVzZXIiLCJuYmYiOjE3NzgxNDY4ODUsImV4cCI6MTc3ODE1MDQ4NSwiaXNzIjoidG9kbyIsImF1ZCI6InRvZG8tYXBpIn0.YmvDrMwX_03tgo8ISabPm_oAkWCaSL1HJsN7uobJX7I
+@adminToken = WSTAW_ADMIN_ACCESS_TOKEN
 
 ### Sign up - default role (User)
 POST {{host}}/Auth/sign-up
@@ -69,5 +71,27 @@ Authorization: Bearer {{token}}
 
 ### Verify task is visible for user
 GET {{host}}/Users/{{userId}}/tasks
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Admin adds task for selected user
+POST {{host}}/users/{{userId}}/tasks
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Task dodany przez admina",
+  "description": "Dodany endpointem admin"
+}
+
+### Verify user tasks after admin add
+GET {{host}}/Users/{{userId}}/tasks
+Accept: application/json
+Authorization: Bearer {{adminToken}}
+
+
+### Get single task by id (authorized user)
+GET {{host}}/Tasks/{{taskId}}
 Accept: application/json
 Authorization: Bearer {{token}}
