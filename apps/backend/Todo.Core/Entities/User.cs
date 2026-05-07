@@ -65,4 +65,7 @@ public class User
 
     public void ChangePassword(Password newSecuredPassword)
         =>  Password = newSecuredPassword;
+    
+    public void ChangeUsername(string newUsername)
+        => Username = new Username(newUsername);
 }
