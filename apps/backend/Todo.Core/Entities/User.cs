@@ -62,4 +62,7 @@ public class User
         Email = new Email(newEmail);
         IsEmailConfirmed = false;
     }
+
+    public void ChangePassword(Password newSecuredPassword)
+        =>  Password = newSecuredPassword;
 }
