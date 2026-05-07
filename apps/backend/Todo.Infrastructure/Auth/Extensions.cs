@@ -38,7 +38,7 @@ internal static class Extensions
         
         services.AddAuthorization(authorization =>
         {
-            authorization.AddPolicy("is-admin", policy =>
+            authorization.AddPolicy("RequireAdminRole", policy =>
             {
                 policy.RequireRole("Admin");
             });

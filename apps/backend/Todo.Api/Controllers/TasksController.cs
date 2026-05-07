@@ -30,4 +30,21 @@ public class TasksController(
         await addTaskCommandHandler.HandleAsync(command);
         return Ok();
     }
+
+    [HttpPost("/users/{userId:guid}/tasks")]
+    [Authorize(Policy = "RequireAdminRole")]
+    public async Task<ActionResult> AddTaskForUser([FromRoute] Guid userId, [FromBody] AddTaskRequest request)
+    {
+        var id = new TaskId();
+        
+        var command = new AddTask(
+            id,
+            userId,
+            request.Name,
+            request.Description
+        );
+        
+        await addTaskCommandHandler.HandleAsync(command);
+        return Ok();
+    }
 }
