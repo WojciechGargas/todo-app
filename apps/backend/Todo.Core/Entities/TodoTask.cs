@@ -13,6 +13,15 @@ public class TodoTask
     public bool IsCompleted { get; private set; }
     public IReadOnlyCollection<UserId> SharedWithUserIds => _sharedWithUserIds;
 
+    public TodoTask(TaskId taskId, UserId ownerUserId, TaskName taskName,
+        TaskDescription taskDescription)
+    {
+        TaskId = taskId;
+        OwnerUserId = ownerUserId;
+        TaskName = taskName;
+        TaskDescription = taskDescription;
+    }
+    
     public void ShareWith(UserId userId)
     {
         if (userId == OwnerUserId) return;

@@ -20,6 +20,7 @@ internal static class Extensions
         
         services.AddDbContext<TodoDbContext>(x => x.UseNpgsql(options.ConnectionString));
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ITaskRepository, TaskRepository>();
         services.AddScoped<IUnitOfWork, PostgresUnitOfWork>();
         services.TryDecorate(typeof(ICommandHandler<>), typeof(UnitOfWorkCommandHandlerDecorator<>));
 
