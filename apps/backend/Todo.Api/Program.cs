@@ -1,4 +1,5 @@
 using Todo.Application;
+using Todo.Core;
 using Todo.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,7 @@ if (builder.Environment.IsDevelopment())
 builder.Services.AddOpenApi();
 
 builder.Services
+    .AddCore()
     .AddApplication()
     .AddInfrastructure(builder.Configuration)
     .AddControllers();
