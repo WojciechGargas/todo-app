@@ -2,14 +2,14 @@
 using Todo.Application.Abstractions;
 using Todo.Application.DTO;
 using Todo.Application.Exceptions;
-using Todo.Application.Quaries;
+using Todo.Application.Users.Queries.GetUserWithTasks;
 using Todo.Core.ValueObjects;
 
 namespace Todo.Infrastructure.DAL.Handlers;
 
-internal sealed class GetUserWithTasksHandler(TodoDbContext dbContext) : IQueryHandler<GetUserWithTasks, UserWithTasksDto>
+internal sealed class GetUserWithTasksHandler(TodoDbContext dbContext) : IQueryHandler<GetUserWithTasksQuery, UserWithTasksDto>
 {
-    public async Task<UserWithTasksDto> HandleAsync(GetUserWithTasks query)
+    public async Task<UserWithTasksDto> HandleAsync(GetUserWithTasksQuery query)
     {
         var userId = new UserId(query.UserId);
         var user = await dbContext.Users

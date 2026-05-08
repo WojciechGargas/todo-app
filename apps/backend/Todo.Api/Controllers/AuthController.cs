@@ -1,24 +1,31 @@
 using Microsoft.AspNetCore.Mvc;
 using Todo.Application.Abstractions;
-using Todo.Application.Commands.ProfileCommands;
-using Todo.Application.Commands.UserCommands;
 using Todo.Application.Security;
+using Todo.Application.Users.Commands.ConfirmEmail;
+using Todo.Application.Users.Commands.SignIn;
+using Todo.Application.Users.Commands.SignUp;
 
 namespace Todo.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
 public class AuthController(
-    ICommandHandler<SignIn> signInHandler,
-    ICommandHandler<SignUp> signUpHandler,
-    ICommandHandler<ConfirmEmail> confirmEmailHandler,
+    ICommandHandler<SignInCommand> signInHandler,
+    ICommandHandler<SignUpCommand> signUpHandler,
+    ICommandHandler<ConfirmEmailCommand> confirmEmailHandler,
     ITokenStorage tokenStorage)
     : ControllerBase
 {
     [HttpPost("sign-up")]
-    public async Task<ActionResult> SignUp([FromBody] SignUp command)
+    public async Task<ActionResult> SignUp([FromBody] SignUpRequest request)
     {
-        command = command with { UserId = Guid.NewGuid() };
+        var command = new SignUpCommand(
+            Guid.NewGuid(),
+            request.Email,
+            request.Username,
+            request.Password,
+            request.FullName,
+            request.Role);
         await signUpHandler.HandleAsync(command);
 
         return Created();
@@ -27,20 +34,21 @@ public class AuthController(
     [HttpPost("confirm-email")]
     public async Task<ActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
     {
-        await confirmEmailHandler.HandleAsync(new ConfirmEmail(request.Token));
+        await confirmEmailHandler.HandleAsync(new ConfirmEmailCommand(request.Token));
         return NoContent();
     }
 
     [HttpGet("confirm-email")]
     public async Task<ActionResult> ConfirmEmailFromLink([FromQuery] string token)
     {
-        await confirmEmailHandler.HandleAsync(new ConfirmEmail(token));
+        await confirmEmailHandler.HandleAsync(new ConfirmEmailCommand(token));
         return Content("Email confirmed. You can close this page.");
     }
 
     [HttpPost("sign-in")]
-    public async Task<ActionResult> SignIn([FromBody] SignIn command)
+    public async Task<ActionResult> SignIn([FromBody] SignInRequest request)
     {
+        var command = new SignInCommand(request.Email, request.Password);
         await signInHandler.HandleAsync(command);
         var jwt = tokenStorage.Get();
 

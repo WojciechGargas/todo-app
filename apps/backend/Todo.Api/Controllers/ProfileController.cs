@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Todo.Api.Auth;
 using Todo.Api.Exceptions;
 using Todo.Application.Abstractions;
-using Todo.Application.Commands.ProfileCommands;
+using Todo.Application.Users.Commands.ChangeEmail;
+using Todo.Application.Users.Commands.ChangeFullname;
 
 namespace Todo.Api.Controllers;
 
@@ -12,8 +13,8 @@ namespace Todo.Api.Controllers;
 [Route("[controller]")]
 
 public class ProfileController(
-    ICommandHandler<ChangeFullname> changeFullnameHandler,
-    ICommandHandler<ChangeEmail> changeEmailHandler)
+    ICommandHandler<ChangeFullnameCommand> changeFullnameHandler,
+    ICommandHandler<ChangeEmailCommand> changeEmailHandler)
     : ControllerBase
 {
     [HttpPatch("profile/changeFullname")]
@@ -21,7 +22,7 @@ public class ProfileController(
     {
         var userId = User.GetUserIdOrThrow();
 
-        await changeFullnameHandler.HandleAsync(new ChangeFullname(userId, request.NewFullname));
+        await changeFullnameHandler.HandleAsync(new ChangeFullnameCommand(userId, request.NewFullname));
         
         return NoContent();
     }
@@ -31,7 +32,7 @@ public class ProfileController(
     {
         var userId = User.GetUserIdOrThrow();
         
-        await changeEmailHandler.HandleAsync(new ChangeEmail(userId, request.NewEmail));
+        await changeEmailHandler.HandleAsync(new ChangeEmailCommand(userId, request.NewEmail));
         
         return Accepted();
     }
