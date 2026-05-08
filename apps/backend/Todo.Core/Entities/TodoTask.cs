@@ -34,4 +34,22 @@ public class TodoTask
         if (!_sharedWithUserIds.Contains(userId)) return;
         _sharedWithUserIds.Remove(userId);
     }
+    
+    public void ChangeName(string newName)
+        => TaskName = new TaskName(newName);
+    
+    public void ChangeDescription(string newDescription)
+        => TaskDescription = new TaskDescription(newDescription);
+
+    public void MarkAsCompleted()
+    {
+        if(IsCompleted)  return;
+        IsCompleted = true;
+    }
+    
+    public void MarkAsUncompleted()
+    {
+        if(!IsCompleted)  return;
+        IsCompleted = false;
+    }
 }

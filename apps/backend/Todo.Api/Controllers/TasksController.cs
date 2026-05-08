@@ -4,6 +4,7 @@ using Todo.Api.Auth;
 using Todo.Application.Abstractions;
 using Todo.Application.DTO;
 using Todo.Application.TodoTasks.Commands.AddTask;
+using Todo.Application.TodoTasks.Commands.UpdateTask;
 using Todo.Application.TodoTasks.Queries.GetTask;
 using Todo.Core.ValueObjects;
 
@@ -14,6 +15,7 @@ namespace Todo.Api.Controllers;
 [Route("[controller]")]
 public class TasksController(
     ICommandHandler<AddTaskCommand> addTaskCommandHandler,
+    ICommandHandler<UpdateTaskCommand> updateTaskCommandHandler,
     IQueryHandler<GetTaskQuery, TodoTaskDto> getTaskHandler)
     : ControllerBase
 {
@@ -44,7 +46,24 @@ public class TasksController(
         );
 
         await addTaskCommandHandler.HandleAsync(command);
+        
         return Ok();
+    }
+
+    [HttpPatch("updateTask/{id:guid}")]
+    public async Task<ActionResult> UpdateTask([FromRoute] Guid id, [FromBody] UpdateTaskRequest request)
+    {
+        var userId = User.GetUserIdOrThrow();
+        var command = new UpdateTaskCommand(
+            new TaskId(id),
+            userId,
+            request.Name,
+            request.Description,
+            request.IsCompleted);
+        
+        await updateTaskCommandHandler.HandleAsync(command);
+        
+        return NoContent();
     }
 
     [HttpPost("/users/{userId:guid}/addTask")]
@@ -61,6 +80,7 @@ public class TasksController(
         );
         
         await addTaskCommandHandler.HandleAsync(command);
+        
         return Ok();
     }
 }
