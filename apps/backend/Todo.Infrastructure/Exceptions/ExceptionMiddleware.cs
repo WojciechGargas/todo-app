@@ -1,7 +1,6 @@
 using Humanizer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Todo.Application.Exceptions;
 using Todo.Core.Exceptions;
 
 namespace Todo.Infrastructure.Exceptions;

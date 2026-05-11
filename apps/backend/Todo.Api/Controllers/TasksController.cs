@@ -7,6 +7,7 @@ using Todo.Application.TodoTasks.Commands.AddTask;
 using Todo.Application.TodoTasks.Commands.DeleteTask;
 using Todo.Application.TodoTasks.Commands.UpdateTask;
 using Todo.Application.TodoTasks.Queries.GetTask;
+using Todo.Application.TodoTasks.Queries.GetTasks;
 using Todo.Core.ValueObjects;
 
 namespace Todo.Api.Controllers;
@@ -18,7 +19,8 @@ public class TasksController(
     ICommandHandler<AddTaskCommand> addTaskCommandHandler,
     ICommandHandler<DeleteTaskCommand> deleteTaskCommandHandler,
     ICommandHandler<UpdateTaskCommand> updateTaskCommandHandler,
-    IQueryHandler<GetTaskQuery, TodoTaskDto> getTaskHandler)
+    IQueryHandler<GetTaskQuery, TodoTaskDto> getTaskHandler,
+    IQueryHandler<GetTasksQuery, IReadOnlyList<TodoTaskDto>> getTasksHandler)
     : ControllerBase
 {
     [HttpGet("{id:guid}")]
@@ -32,6 +34,19 @@ public class TasksController(
         });
 
         return activity;
+    }
+
+    [HttpGet("tasks")]
+    public async Task<ActionResult<IReadOnlyList<TodoTaskDto>>> GetTasks()
+    {
+        var userId = User.GetUserIdOrThrow();
+
+        var tasks = await getTasksHandler.HandleAsync(new GetTasksQuery
+        {
+            UserId = userId
+        });
+
+        return Ok(tasks);
     }
     
     [HttpPost("addTask")]

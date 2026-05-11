@@ -1,5 +1,6 @@
 ﻿using Todo.Application.Abstractions;
 using Todo.Application.Exceptions;
+using Todo.Core.Exceptions;
 using Todo.Core.Repositories;
 using Todo.Core.ValueObjects;
 
