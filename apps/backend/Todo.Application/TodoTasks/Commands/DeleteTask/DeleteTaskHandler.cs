@@ -19,7 +19,10 @@ public class DeleteTaskHandler(
         
         var task = await taskRepository.GetTaskByIdAsync(command.TaskId) ??
                    throw new TaskNotFoundException(command.TaskId);
-        
-        await taskService.DeleteTaskAsync(user.UserId, task.TaskId);
+
+        if (task.OwnerUserId != user.UserId)
+            throw new TaskAccessDeniedException();
+
+        await taskService.DeleteTaskAsync(user, task);
     }
 }

@@ -19,8 +19,9 @@ public class TaskService(ITaskRepository taskRepository) : ITaskService
         user.AddTask(task.TaskId);
     }
 
-    public Task DeleteTaskAsync(Guid userId, TaskId id)
+    public async Task DeleteTaskAsync(User user, TodoTask task)
     {
-        throw new NotImplementedException();
+        user.RemoveTask(task.TaskId);
+        await taskRepository.DeleteTaskAsync(task);
     }
 }

@@ -4,6 +4,7 @@ using Todo.Api.Auth;
 using Todo.Application.Abstractions;
 using Todo.Application.DTO;
 using Todo.Application.TodoTasks.Commands.AddTask;
+using Todo.Application.TodoTasks.Commands.DeleteTask;
 using Todo.Application.TodoTasks.Commands.UpdateTask;
 using Todo.Application.TodoTasks.Queries.GetTask;
 using Todo.Core.ValueObjects;
@@ -15,6 +16,7 @@ namespace Todo.Api.Controllers;
 [Route("[controller]")]
 public class TasksController(
     ICommandHandler<AddTaskCommand> addTaskCommandHandler,
+    ICommandHandler<DeleteTaskCommand> deleteTaskCommandHandler,
     ICommandHandler<UpdateTaskCommand> updateTaskCommandHandler,
     IQueryHandler<GetTaskQuery, TodoTaskDto> getTaskHandler)
     : ControllerBase
@@ -62,6 +64,17 @@ public class TasksController(
             request.IsCompleted);
         
         await updateTaskCommandHandler.HandleAsync(command);
+        
+        return NoContent();
+    }
+
+    [HttpDelete("deleteTask/{id:guid}")]
+    public async Task<ActionResult> DeleteTask([FromRoute] Guid id)
+    {
+        var userId = User.GetUserIdOrThrow();
+        var command = new DeleteTaskCommand(userId, new TaskId(id));
+        
+        await deleteTaskCommandHandler.HandleAsync(command);
         
         return NoContent();
     }

@@ -7,4 +7,5 @@ public interface ITaskRepository
 {
     Task<TodoTask?> GetTaskByIdAsync(TaskId taskId);
     Task AddTaskAsync(TodoTask task);
+    Task DeleteTaskAsync(TodoTask task);
 }

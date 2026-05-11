@@ -14,4 +14,10 @@ public class TaskRepository(TodoDbContext dbContext) : ITaskRepository
 
     public async Task AddTaskAsync(TodoTask task)
         => await _tasks.AddAsync(task);
+
+    public Task DeleteTaskAsync(TodoTask task)
+    {
+        _tasks.Remove(task);
+        return Task.CompletedTask;
+    }
 }

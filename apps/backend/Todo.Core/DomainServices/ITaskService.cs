@@ -6,5 +6,5 @@ namespace Todo.Core.DomainServices;
 public interface ITaskService
 {
     Task AddTaskAsync(User user, TaskId taskId, string name, string description);
-    Task DeleteTaskAsync(Guid userId, TaskId id);
+    Task DeleteTaskAsync(User user, TodoTask task);
 }
