@@ -10,6 +10,7 @@ using Todo.Application.TodoTasks.Commands.UnshareTask;
 using Todo.Application.TodoTasks.Commands.UpdateTask;
 using Todo.Application.TodoTasks.Queries.GetTask;
 using Todo.Application.TodoTasks.Queries.GetTasks;
+using Todo.Application.TodoTasks.Queries.GetTasksWithShared;
 using Todo.Core.ValueObjects;
 
 namespace Todo.Api.Controllers;
@@ -24,7 +25,8 @@ public class TasksController(
     ICommandHandler<ShareTaskCommand> shareTaskCommandHandler,
     ICommandHandler<UnshareTaskCommand > unshareTaskCommandHandler,
     IQueryHandler<GetTaskQuery, TodoTaskDto> getTaskHandler,
-    IQueryHandler<GetTasksQuery, IReadOnlyList<TodoTaskDto>> getTasksHandler)
+    IQueryHandler<GetTasksQuery, IReadOnlyList<TodoTaskDto>> getTasksHandler,
+    IQueryHandler<GetTasksWithSharedQuery, IReadOnlyList<TodoTaskDto>> getTasksWithSharedHandler)
     : ControllerBase
 {
     [HttpGet("{id:guid}")]
@@ -47,6 +49,19 @@ public class TasksController(
         var userId = User.GetUserIdOrThrow();
 
         var tasks = await getTasksHandler.HandleAsync(new GetTasksQuery
+        {
+            UserId = userId
+        });
+
+        return Ok(tasks);
+    }
+    
+    [HttpGet("tasksWithShared")]
+    public async Task<ActionResult<IReadOnlyList<TodoTaskDto>>> GetTasksWithShared()
+    {
+        var userId = User.GetUserIdOrThrow();
+
+        var tasks = await getTasksWithSharedHandler.HandleAsync(new GetTasksWithSharedQuery()
         {
             UserId = userId
         });
