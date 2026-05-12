@@ -5,6 +5,8 @@ using Todo.Application.Abstractions;
 using Todo.Application.DTO;
 using Todo.Application.TodoTasks.Commands.AddTask;
 using Todo.Application.TodoTasks.Commands.DeleteTask;
+using Todo.Application.TodoTasks.Commands.ShareTask;
+using Todo.Application.TodoTasks.Commands.UnshareTask;
 using Todo.Application.TodoTasks.Commands.UpdateTask;
 using Todo.Application.TodoTasks.Queries.GetTask;
 using Todo.Application.TodoTasks.Queries.GetTasks;
@@ -19,12 +21,15 @@ public class TasksController(
     ICommandHandler<AddTaskCommand> addTaskCommandHandler,
     ICommandHandler<DeleteTaskCommand> deleteTaskCommandHandler,
     ICommandHandler<UpdateTaskCommand> updateTaskCommandHandler,
+    ICommandHandler<ShareTaskCommand> shareTaskCommandHandler,
+    ICommandHandler<UnshareTaskCommand > unshareTaskCommandHandler,
     IQueryHandler<GetTaskQuery, TodoTaskDto> getTaskHandler,
     IQueryHandler<GetTasksQuery, IReadOnlyList<TodoTaskDto>> getTasksHandler)
     : ControllerBase
 {
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<TodoTaskDto>> GetTask([FromRoute] Guid id)
+    public async Task<ActionResult<TodoTaskDto>> GetTask(
+        [FromRoute] Guid id)
     {
         var userId = User.GetUserIdOrThrow();
         var activity = await getTaskHandler.HandleAsync(new GetTaskQuery
@@ -50,7 +55,8 @@ public class TasksController(
     }
     
     [HttpPost("addTask")]
-    public async Task<ActionResult> AddTask([FromBody] AddTaskRequest request)
+    public async Task<ActionResult> AddTask(
+        [FromBody] AddTaskRequest request)
     {
         var userId = User.GetUserIdOrThrow();
         var id = TaskId.New();
@@ -68,7 +74,9 @@ public class TasksController(
     }
 
     [HttpPatch("updateTask/{id:guid}")]
-    public async Task<ActionResult> UpdateTask([FromRoute] Guid id, [FromBody] UpdateTaskRequest request)
+    public async Task<ActionResult> UpdateTask(
+        [FromRoute] Guid id, 
+        [FromBody] UpdateTaskRequest request)
     {
         var userId = User.GetUserIdOrThrow();
         var command = new UpdateTaskCommand(
@@ -84,7 +92,8 @@ public class TasksController(
     }
 
     [HttpDelete("deleteTask/{id:guid}")]
-    public async Task<ActionResult> DeleteTask([FromRoute] Guid id)
+    public async Task<ActionResult> DeleteTask(
+        [FromRoute] Guid id)
     {
         var userId = User.GetUserIdOrThrow();
         var command = new DeleteTaskCommand(userId, new TaskId(id));
@@ -94,9 +103,42 @@ public class TasksController(
         return NoContent();
     }
 
+    [HttpPost("{taskId:guid}/share")]
+    public async Task<ActionResult> ShareTask(
+        [FromRoute] Guid taskId, 
+        [FromBody] ShareTaskRequest request)
+    {
+        var requestedByUserId = User.GetUserIdOrThrow();
+        
+        await shareTaskCommandHandler.HandleAsync(new ShareTaskCommand(
+            requestedByUserId,
+            new TaskId(taskId),
+            request.TargetUserId,
+            request.Permission));
+
+        return NoContent();
+    }
+
+    [HttpPost("{taskId:guid}/unshare")]
+    public async Task<ActionResult> UnshareTask(
+        [FromRoute] Guid taskId,
+        [FromBody] UnshareTaskRequest request)
+    {
+        var requestedByUserId = User.GetUserIdOrThrow();
+
+        await unshareTaskCommandHandler.HandleAsync(new UnshareTaskCommand(
+            requestedByUserId,
+            new TaskId(taskId),
+            request.TargetUserId));
+
+        return NoContent();
+    }
+
     [HttpPost("/users/{userId:guid}/addTask")]
     [Authorize(Policy = "RequireAdminRole")]
-    public async Task<ActionResult> AddTaskForUser([FromRoute] Guid userId, [FromBody] AddTaskRequest request)
+    public async Task<ActionResult> AddTaskForUser(
+        [FromRoute] Guid userId, 
+        [FromBody] AddTaskRequest request)
     {
         var id = TaskId.New();
         

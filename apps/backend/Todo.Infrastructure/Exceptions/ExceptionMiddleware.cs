@@ -26,6 +26,8 @@ internal sealed class ExceptionMiddleware(ILogger<ExceptionMiddleware> logger) :
         {
             TaskAccessDeniedException => (StatusCodes.Status403Forbidden, new Error("forbidden", exception.Message)),
             UserAccessDeniedException => (StatusCodes.Status403Forbidden, new Error("forbidden", exception.Message)),
+            TaskAlreadySharedException => (StatusCodes.Status409Conflict, new Error("already-shared", exception.Message)),
+            TaskShareNotFoundException => (StatusCodes.Status404NotFound, new Error("not-found", exception.Message)),
             CustomException => (StatusCodes.Status400BadRequest, new Error(exception
                 .GetType().Name.Replace("Exception", string.Empty).Underscore(), exception.Message)),
             _ => (StatusCodes.Status500InternalServerError, new Error("error", "There was an error.")),

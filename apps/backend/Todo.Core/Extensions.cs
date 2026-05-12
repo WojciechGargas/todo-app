@@ -13,6 +13,7 @@ public static class Extensions
         services.AddSingleton<ITaskDeletionPolicy, TaskDeletionPolicy>();
         services.AddSingleton<ITaskUpdatePolicy, TaskUpdatePolicy>();
         services.AddSingleton<IUserUpdatePolicy, UserUpdatePolicy>();
+        services.AddSingleton<ITaskSharePolicy, TaskSharePolicy>();
         
         return services;
     }

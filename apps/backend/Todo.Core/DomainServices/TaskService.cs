@@ -53,10 +53,15 @@ public class TaskService(
         if(description is not null)
             task.ChangeDescription(description);
 
-        if (isComplete is true)
-            task.MarkAsCompleted();
-        else if(isComplete is false)
-            task.MarkAsUncompleted();
+        switch (isComplete)
+        {
+            case true:
+                task.MarkAsCompleted();
+                break;
+            case false:
+                task.MarkAsUncompleted();
+                break;
+        }
     }
 
     public async Task ShareTaskAsync(User requestedBy, TodoTask task,
