@@ -3,13 +3,13 @@ using Todo.Core.Enums;
 
 namespace Todo.Core.Policies;
 
-public class TaskUpdatePolicy : ITaskUpdatePolicy
+public class TaskReadPolicy : ITaskReadPolicy
 {
-    public bool CanUpdate(TodoTask task, User user, TaskShare? share)
+    public bool CanRead(TodoTask task, User user, TaskShare? share)
     {
         if (user.Role == UserRole.Admin || task.OwnerUserId == user.UserId)
             return true;
         
-        return share?.Permission == TaskSharePermission.Edit;
+        return share is not null;
     }
 }

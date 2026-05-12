@@ -1,4 +1,6 @@
+using Todo.Core.Abstractions;
 using Todo.Core.Entities;
+using Todo.Core.Enums;
 using Todo.Core.Exceptions;
 using Todo.Core.Policies;
 using Todo.Core.Repositories;
@@ -9,7 +11,10 @@ namespace Todo.Core.DomainServices;
 public class TaskService(
     ITaskRepository taskRepository,
     ITaskDeletionPolicy deletionPolicy,
-    ITaskUpdatePolicy  taskUpdatePolicy)
+    ITaskUpdatePolicy  taskUpdatePolicy,
+    ITaskShareRepository taskshareRepository,
+    ITaskSharePolicy  taskSharePolicy,
+    IClock clock)
     : ITaskService
 {
     public async Task AddTaskAsync(User user, TaskId taskId, string name, string description)
@@ -34,9 +39,12 @@ public class TaskService(
         await taskRepository.DeleteTaskAsync(task);
     }
 
-    public Task UpdateTaskAsync(User user, TodoTask task, string? name, string? description, bool? isComplete)
+    public async Task UpdateTaskAsync(User user, TodoTask task, string? name,
+        string? description, bool? isComplete)
     {
-        if (!taskUpdatePolicy.CanUpdate(task, user))
+        var share = await taskshareRepository.GetShareAsync(task.TaskId, user.UserId);
+        
+        if (!taskUpdatePolicy.CanUpdate(task, user , share))
             throw new TaskAccessDeniedException();
         
         if(name is not null)
@@ -49,7 +57,42 @@ public class TaskService(
             task.MarkAsCompleted();
         else if(isComplete is false)
             task.MarkAsUncompleted();
+    }
+
+    public async Task ShareTaskAsync(User requestedBy, TodoTask task,
+        UserId targetUserId, TaskSharePermission permission)
+    {
+        if (!taskSharePolicy.CanShare(task, requestedBy))
+            throw new TaskAccessDeniedException();
+
+        if (targetUserId == requestedBy.UserId)
+            throw new CannotShareTaskWithSelfException();
         
-        return Task.CompletedTask;
+        var existingShare = await taskshareRepository.GetShareAsync(task.TaskId, targetUserId);
+
+        if (existingShare is not null)
+            throw new TaskAlreadySharedException();
+
+        var share = new TaskShare(
+            task.TaskId,
+            targetUserId,
+            requestedBy.UserId,
+            permission,
+            clock.CurrentTimeUtc());
+        
+        await taskshareRepository.AddShareAsync(share);
+    }
+
+    public async Task UnshareTaskAsync(User requestedBy, TodoTask task, UserId targetUserId)
+    {
+        if (!taskSharePolicy.CanShare(task, requestedBy))
+            throw new TaskAccessDeniedException();
+        
+        var existingShare = await taskshareRepository.GetShareAsync(task.TaskId, targetUserId);
+
+        if (existingShare is null)
+            throw new TaskShareNotFoundException();
+        
+        await taskshareRepository.DeleteShareAsync(existingShare);
     }
 }

@@ -4,5 +4,5 @@ namespace Todo.Core.Policies;
 
 public interface ITaskUpdatePolicy
 {
-    bool CanUpdate(TodoTask task, User user);
+    bool CanUpdate(TodoTask task, User user, TaskShare? share);
 }
