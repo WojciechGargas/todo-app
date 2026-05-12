@@ -7,6 +7,7 @@ public class TodoDbContext(DbContextOptions<TodoDbContext> options) : DbContext(
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<TodoTask> TodoTasks => Set<TodoTask>();
+    public DbSet<TaskShare> TaskShares => Set<TaskShare>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
