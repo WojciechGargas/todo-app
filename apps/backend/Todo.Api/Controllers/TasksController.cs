@@ -8,6 +8,7 @@ using Todo.Application.TodoTasks.Commands.DeleteTask;
 using Todo.Application.TodoTasks.Commands.ShareTask;
 using Todo.Application.TodoTasks.Commands.UnshareTask;
 using Todo.Application.TodoTasks.Commands.UpdateTask;
+using Todo.Application.TodoTasks.Commands.UpdateTaskSharePermission;
 using Todo.Application.TodoTasks.Queries.GetTask;
 using Todo.Application.TodoTasks.Queries.GetTasks;
 using Todo.Application.TodoTasks.Queries.GetTasksWithShared;
@@ -22,6 +23,7 @@ public class TasksController(
     ICommandHandler<AddTaskCommand> addTaskCommandHandler,
     ICommandHandler<DeleteTaskCommand> deleteTaskCommandHandler,
     ICommandHandler<UpdateTaskCommand> updateTaskCommandHandler,
+    ICommandHandler<UpdateTaskSharePermissionCommand> updateTaskSharePermissionCommandHandler,
     ICommandHandler<ShareTaskCommand> shareTaskCommandHandler,
     ICommandHandler<UnshareTaskCommand > unshareTaskCommandHandler,
     IQueryHandler<GetTaskQuery, TodoTaskDto> getTaskHandler,
@@ -103,6 +105,23 @@ public class TasksController(
         
         await updateTaskCommandHandler.HandleAsync(command);
         
+        return NoContent();
+    }
+
+    [HttpPatch("changePermission/{id:guid}")]
+    public async Task<ActionResult> ChangePermission(
+        [FromRoute] Guid id,
+        [FromBody] UpdateTaskSharePermissionRequest request)
+    {
+        var userId = User.GetUserIdOrThrow();
+        var command = new UpdateTaskSharePermissionCommand(
+            userId,
+            new TaskId(id),
+            request.TargetUserId,
+            request.TargetSharePermission);
+        
+        await updateTaskSharePermissionCommandHandler.HandleAsync(command);
+
         return NoContent();
     }
 

@@ -2,7 +2,6 @@
 using Todo.Application.Abstractions;
 using Todo.Application.DTO;
 using Todo.Application.TodoTasks.Queries.GetTasksWithShared;
-using Todo.Core.Entities;
 using Todo.Core.ValueObjects;
 
 namespace Todo.Infrastructure.DAL.Handlers;

@@ -9,6 +9,9 @@ public interface ITaskService
     Task AddTaskAsync(User user, TaskId taskId, string name, string description);
     Task DeleteTaskAsync(User user, TodoTask task);
     Task UpdateTaskAsync(User user, TodoTask task, string? name, string? description, bool? isComplete);
-    Task ShareTaskAsync(User requestedBy, TodoTask task, UserId targetUserId, TaskSharePermission permission);
+    Task ShareTaskAsync(User requestedBy, TodoTask task, UserId targetUserId, 
+        TaskSharePermission permission);
     Task UnshareTaskAsync(User user, TodoTask task, UserId targetUserId);
+    Task UpdateTaskSharePermissionAsync(User requestedBy, TodoTask task, UserId targetUserId, 
+        TaskSharePermission permission);
 }

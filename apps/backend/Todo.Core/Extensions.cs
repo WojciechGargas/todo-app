@@ -14,6 +14,7 @@ public static class Extensions
         services.AddSingleton<ITaskUpdatePolicy, TaskUpdatePolicy>();
         services.AddSingleton<IUserUpdatePolicy, UserUpdatePolicy>();
         services.AddSingleton<ITaskSharePolicy, TaskSharePolicy>();
+        services.AddSingleton<ITaskChangePermissionPolicy, TaskChangePermissionPolicy>();
         
         return services;
     }

@@ -14,6 +14,7 @@ public class TaskService(
     ITaskUpdatePolicy  taskUpdatePolicy,
     ITaskShareRepository taskshareRepository,
     ITaskSharePolicy  taskSharePolicy,
+    ITaskChangePermissionPolicy  taskChangePermissionPolicy,
     IClock clock)
     : ITaskService
 {
@@ -99,5 +100,19 @@ public class TaskService(
             throw new TaskShareNotFoundException();
         
         await taskshareRepository.DeleteShareAsync(existingShare);
+    }
+
+    public async Task UpdateTaskSharePermissionAsync(User requestedBy, TodoTask task, 
+        UserId targetUserId, TaskSharePermission permission)
+    {
+        if(!taskChangePermissionPolicy.CanChange(task, requestedBy))
+            throw new TaskAccessDeniedException();
+        
+        var existingShare = await taskshareRepository.GetShareAsync(task.TaskId, targetUserId);
+
+        if (existingShare is null)
+            throw new TaskShareNotFoundException();
+        
+        await taskshareRepository.UpdatePermissionAsync(existingShare.TaskId, targetUserId, permission);
     }
 }
