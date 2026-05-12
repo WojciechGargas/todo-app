@@ -25,6 +25,7 @@ internal sealed class ExceptionMiddleware(ILogger<ExceptionMiddleware> logger) :
         var (statusCode, error) = exception switch
         {
             TaskAccessDeniedException => (StatusCodes.Status403Forbidden, new Error("forbidden", exception.Message)),
+            UserAccessDeniedException => (StatusCodes.Status403Forbidden, new Error("forbidden", exception.Message)),
             CustomException => (StatusCodes.Status400BadRequest, new Error(exception
                 .GetType().Name.Replace("Exception", string.Empty).Underscore(), exception.Message)),
             _ => (StatusCodes.Status500InternalServerError, new Error("error", "There was an error.")),

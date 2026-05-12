@@ -1,6 +1,4 @@
-﻿using Todo.Core.Exceptions;
-
-namespace Todo.Application.Exceptions;
+namespace Todo.Core.Exceptions;
 
 public class EmailUnchangedException : CustomException
 {

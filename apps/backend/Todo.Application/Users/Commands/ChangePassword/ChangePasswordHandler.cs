@@ -1,6 +1,7 @@
-﻿using Todo.Application.Abstractions;
+using Todo.Application.Abstractions;
 using Todo.Application.Exceptions;
 using Todo.Application.Security;
+using Todo.Core.DomainServices;
 using Todo.Core.Repositories;
 using Todo.Core.ValueObjects;
 
@@ -8,7 +9,8 @@ namespace Todo.Application.Users.Commands.ChangePassword;
 
 public class ChangePasswordHandler(
     IUserRepository userRepository,
-    IPasswordManager passwordManager)
+    IPasswordManager passwordManager,
+    IUserService userService)
     : ICommandHandler<ChangePasswordCommand>
 {
     public async Task HandleAsync(ChangePasswordCommand command)
@@ -20,9 +22,9 @@ public class ChangePasswordHandler(
         {
             throw new InvalidCredentialsException();
         }
-        
+
         var newPassword = new Password(command.NewPassword);
         var securedPassword = passwordManager.Secure(newPassword);
-        user.ChangePassword(securedPassword);
+        await userService.ChangePasswordAsync(user, user, securedPassword);
     }
 }

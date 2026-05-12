@@ -1,10 +1,10 @@
 using Todo.Application.Abstractions;
 using Todo.Application.Email;
-using Todo.Application.Exceptions;
 using Todo.Application.Security;
 using Todo.Core.Abstractions;
 using Todo.Core.Entities;
 using Todo.Core.Enums;
+using Todo.Core.Exceptions;
 using Todo.Core.Repositories;
 using Todo.Core.ValueObjects;
 using EmailAddress = Todo.Core.ValueObjects.Email;

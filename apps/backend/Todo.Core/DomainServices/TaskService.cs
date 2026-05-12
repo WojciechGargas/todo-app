@@ -8,7 +8,8 @@ namespace Todo.Core.DomainServices;
 
 public class TaskService(
     ITaskRepository taskRepository,
-    ITaskDeletionPolicy deletionPolicy)
+    ITaskDeletionPolicy deletionPolicy,
+    ITaskUpdatePolicy  taskUpdatePolicy)
     : ITaskService
 {
     public async Task AddTaskAsync(User user, TaskId taskId, string name, string description)
@@ -31,5 +32,24 @@ public class TaskService(
         
         user.RemoveTask(task.TaskId);
         await taskRepository.DeleteTaskAsync(task);
+    }
+
+    public Task UpdateTaskAsync(User user, TodoTask task, string? name, string? description, bool? isComplete)
+    {
+        if (!taskUpdatePolicy.CanUpdate(task, user))
+            throw new TaskAccessDeniedException();
+        
+        if(name is not null)
+            task.ChangeName(name);
+        
+        if(description is not null)
+            task.ChangeDescription(description);
+
+        if (isComplete is true)
+            task.MarkAsCompleted();
+        else if(isComplete is false)
+            task.MarkAsUncompleted();
+        
+        return Task.CompletedTask;
     }
 }
