@@ -1,7 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Todo.Api.Auth;
 using Todo.Application.Abstractions;
 using Todo.Application.Security;
 using Todo.Application.Users.Commands.ConfirmEmail;
+using Todo.Application.Users.Commands.Logout;
 using Todo.Application.Users.Commands.SignIn;
 using Todo.Application.Users.Commands.SignUp;
 
@@ -13,6 +16,7 @@ public class AuthController(
     ICommandHandler<SignInCommand> signInHandler,
     ICommandHandler<SignUpCommand> signUpHandler,
     ICommandHandler<ConfirmEmailCommand> confirmEmailHandler,
+    ICommandHandler<LogoutCommand> logoutHandler,
     ITokenStorage tokenStorage)
     : ControllerBase
 {
@@ -53,5 +57,19 @@ public class AuthController(
         var jwt = tokenStorage.Get();
 
         return Ok(jwt);
+    }
+    
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<ActionResult> Logout()
+    {
+        var command = new LogoutCommand(
+            User.GetUserIdOrThrow(),
+            User.GetTokenIdOrThrow(),
+            User.GetTokenExpirationUtcOrThrow());
+            
+        await logoutHandler.HandleAsync(command);
+        
+        return NoContent();
     }
 }

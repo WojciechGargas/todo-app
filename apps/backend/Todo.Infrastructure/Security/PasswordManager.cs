@@ -11,5 +11,5 @@ public class PasswordManager(IPasswordHasher<User> passwordHasher ) : IPasswordM
 
     public bool Validate(string password, string securePassword)
         => passwordHasher.VerifyHashedPassword(null!, securePassword, password)
-            is PasswordVerificationResult.Success;
+            is PasswordVerificationResult.Success or PasswordVerificationResult.SuccessRehashNeeded;
 }

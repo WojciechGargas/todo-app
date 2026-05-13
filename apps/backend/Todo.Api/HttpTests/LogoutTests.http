@@ -1,0 +1,29 @@
+@host = http://localhost:5251
+@email = gargas.w@gmail.com
+@password = secret123!
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3NWMzNTAzZS00MzFiLTRmMjAtYThjNi1kNGFkZjAxNDU2NTEiLCJqdGkiOiJhNmUwZjhkNjRhZmM0M2IzOWEzMzhmM2Q3YjE1MTExMSIsInVuaXF1ZV9uYW1lIjoiNzVjMzUwM2UtNDMxYi00ZjIwLWE4YzYtZDRhZGYwMTQ1NjUxIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVXNlciIsIm5iZiI6MTc3ODY3MjEwNSwiZXhwIjoxNzc4Njc1NzA1LCJpc3MiOiJ0b2RvIiwiYXVkIjoidG9kby1hcGkifQ.ohQNxhjLsxPCrr4iGjOt9slQU04Y3lmBPN0dFtXMD80
+
+### 1. Sign in and copy accessToken to @token above
+POST {{host}}/Auth/sign-in
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### 2. Authorized request should work before logout
+GET {{host}}/Tasks/tasks
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### 3. Logout revokes current token
+POST {{host}}/Auth/logout
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### 4. Same token should now return 401 Unauthorized
+GET {{host}}/Tasks/tasks
+Accept: application/json
+Authorization: Bearer {{token}}

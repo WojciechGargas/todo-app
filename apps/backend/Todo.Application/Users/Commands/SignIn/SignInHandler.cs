@@ -1,4 +1,3 @@
-using System.Security.Authentication;
 using Todo.Application.Abstractions;
 using Todo.Application.Exceptions;
 using Todo.Application.Security;
@@ -16,11 +15,11 @@ internal sealed class SignInHandler(
     public async Task HandleAsync(SignInCommand command)
     {
         var user = await userRepository.GetUserByEmailAsync(command.Email) ??
-                   throw new InvalidCredentialException();
+                   throw new InvalidCredentialsException();
 
         if (!passwordManager.Validate(command.Password, user.Password))
         {
-            throw new InvalidCredentialException();
+            throw new InvalidCredentialsException();
         }
 
         if (!user.IsEmailConfirmed)

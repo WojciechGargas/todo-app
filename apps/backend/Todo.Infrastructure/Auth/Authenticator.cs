@@ -27,6 +27,7 @@ public class Authenticator(IOptions<AuthOptions> options, IClock clock) : IAuthe
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, userId.ToString()),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
             new(JwtRegisteredClaimNames.UniqueName, userId.ToString()),
             new(ClaimTypes.Role, role)
         };
