@@ -69,4 +69,7 @@ public class User
     
     public void ChangeProfileVisibility(bool isVisible)
         => IsProfileVisibleForSharing = isVisible;
+    
+    public void MarkAsLoggedIn(DateTime loggedAtUtc)
+        => LastLoggedAtUtc = loggedAtUtc;
 }

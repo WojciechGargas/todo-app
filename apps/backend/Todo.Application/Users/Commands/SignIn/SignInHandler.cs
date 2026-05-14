@@ -1,6 +1,7 @@
 using Todo.Application.Abstractions;
 using Todo.Application.Exceptions;
 using Todo.Application.Security;
+using Todo.Core.Abstractions;
 using Todo.Core.Repositories;
 
 namespace Todo.Application.Users.Commands.SignIn;
@@ -9,7 +10,8 @@ internal sealed class SignInHandler(
     IUserRepository userRepository,
     IAuthenticator authenticator,
     IPasswordManager passwordManager,
-    ITokenStorage tokenStorage)
+    ITokenStorage tokenStorage,
+    IClock  clock)
     : ICommandHandler<SignInCommand>
 {
     public async Task HandleAsync(SignInCommand command)
@@ -27,7 +29,7 @@ internal sealed class SignInHandler(
             throw new EmailNotConfirmedException(user.Email);
         }
 
-        //todo: see if u want to mark as logged in
+        user.MarkAsLoggedIn(clock.CurrentTimeUtc());
 
         var jwt = authenticator.CreateToken(user.UserId, user.Role.ToString());
 
