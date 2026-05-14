@@ -9,4 +9,5 @@ public interface IUserService
     Task<Email> PrepareEmailChangeAsync(User requestedBy, User userToUpdate, string newEmail);
     Task ChangeUsernameAsync(User requestedBy, User userToUpdate, string newUsername);
     Task ChangePasswordAsync(User requestedBy, User userToUpdate, string securedPassword);
+    Task ChangeProfileVisibilityAsync(User requestedBy, User userToUpdate,  bool isProfileVisible);
 }

@@ -62,6 +62,14 @@ public class UserService(
         return Task.CompletedTask;
     }
 
+    public Task ChangeProfileVisibilityAsync(User requestedBy, User userToUpdate, bool isProfileVisible)
+    {
+        EnsureCanUpdate(requestedBy, userToUpdate);
+        userToUpdate.ChangeProfileVisibility(isProfileVisible);
+        
+        return Task.CompletedTask;
+    }
+
     private void EnsureCanUpdate(User requestedBy, User userToUpdate)
     {
         if (!userUpdatePolicy.CanUpdate(userToUpdate, requestedBy))

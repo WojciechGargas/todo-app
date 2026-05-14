@@ -62,5 +62,10 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
                         .Select(id => new TaskId(id))
                         .ToList())
             .Metadata.SetValueComparer(TaskIdsComparer);
+        
+        builder.Property(x => x.IsProfileVisibleForSharing)
+            .HasColumnName("is_profile_visible_for_sharing")
+            .HasDefaultValue(true)
+            .IsRequired();
     }
 }

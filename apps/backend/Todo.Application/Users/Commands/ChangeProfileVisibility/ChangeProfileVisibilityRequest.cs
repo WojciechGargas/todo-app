@@ -1,0 +1,3 @@
+﻿namespace Todo.Application.Users.Commands.ChangeProfileVisibility;
+
+public sealed record ChangeProfileVisibilityRequest(bool IsProfileVisibleForSharing);

@@ -17,6 +17,7 @@ public class User
     public bool IsEmailConfirmed { get; private set; }
     public DateTime? LastLoggedAtUtc { get; private set; }
     public IReadOnlyList<TaskId> TaskIds => _taskIds;
+    public bool IsProfileVisibleForSharing { get; private set; } 
 
     public User(UserId userId, Email email, Username username, Password password,
         FullName fullName, UserRole role, DateTime createdAt, bool isEmailConfirmed = false)
@@ -29,24 +30,21 @@ public class User
         Role = role;
         CreatedAt = createdAt;
         IsEmailConfirmed = isEmailConfirmed;
+        IsProfileVisibleForSharing = true;
     }
 
     public void AddTask(TaskId taskId)
     {
         if (_taskIds.Contains(taskId))
-        {
             return;
-        }
-
+        
         _taskIds.Add(taskId);
     }
 
     public void RemoveTask(TaskId taskId)
     {
         if (!_taskIds.Contains(taskId))
-        {
             return;
-        }
 
         _taskIds.Remove(taskId);
     }
@@ -68,4 +66,7 @@ public class User
     
     public void ChangeUsername(string newUsername)
         => Username = new Username(newUsername);
+    
+    public void ChangeProfileVisibility(bool isVisible)
+        => IsProfileVisibleForSharing = isVisible;
 }
