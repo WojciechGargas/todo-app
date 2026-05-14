@@ -70,6 +70,14 @@ public class UserService(
         return Task.CompletedTask;
     }
 
+    public Task MarkAsLoggedInAsync(User requestedBy, User userToUpdate, DateTime loggedAtUtc)
+    {
+        EnsureCanUpdate(requestedBy, userToUpdate);
+        userToUpdate.MarkAsLoggedIn(loggedAtUtc);
+        
+        return Task.CompletedTask;
+    }
+
     private void EnsureCanUpdate(User requestedBy, User userToUpdate)
     {
         if (!userUpdatePolicy.CanUpdate(userToUpdate, requestedBy))

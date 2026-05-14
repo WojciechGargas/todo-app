@@ -10,4 +10,5 @@ public interface IUserService
     Task ChangeUsernameAsync(User requestedBy, User userToUpdate, string newUsername);
     Task ChangePasswordAsync(User requestedBy, User userToUpdate, string securedPassword);
     Task ChangeProfileVisibilityAsync(User requestedBy, User userToUpdate,  bool isProfileVisible);
+    Task MarkAsLoggedInAsync(User requestedBy, User userToUpdate, DateTime loggedAtUtc);
 }
