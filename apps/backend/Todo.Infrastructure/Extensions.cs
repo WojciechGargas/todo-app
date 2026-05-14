@@ -90,7 +90,10 @@ public static class Extensions
             hangfireOptions.CleanupCron);
         if (hangfireOptions.DashboardEnabled)
         {
-            app.UseHangfireDashboard("/hangfire");
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            {
+                Authorization = [new HangfireDashboardAuthorizationFilter()]
+            });
         }
         app.MapControllers();
 
