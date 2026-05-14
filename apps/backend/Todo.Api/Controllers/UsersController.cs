@@ -1,40 +1,32 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Todo.Api.Auth;
 using Todo.Application.Abstractions;
 using Todo.Application.DTO;
-using Todo.Application.Users.Queries.GetUser;
-using Todo.Application.Users.Queries.GetUsers;
-using Todo.Application.Users.Queries.GetUserWithTasks;
+using Todo.Application.Users.Queries.SearchVisibleUsers;
 
 namespace Todo.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("[controller]")]
 
 public class UsersController(
-    IQueryHandler<GetUserQuery, UserDto> getUserHandler,
-    IQueryHandler<GetUserWithTasksQuery, UserWithTasksDto> getUserWithTasksHandler,
-    IQueryHandler<GetUsersQuery,  IEnumerable<UserDto>> getUsersHandler)
+    IQueryHandler<SearchVisibleUsersQuery, IReadOnlyList<UserShareCandidateDto>> searchVisibleUsersHandler) 
     : ControllerBase
 {
-    [HttpGet("{UserId:guid}")]
-    public async Task<ActionResult<UserDto>> GetUser([FromRoute] Guid userId)
+    [HttpGet("search")]
+    public async Task<ActionResult<IReadOnlyList<UserShareCandidateDto>>> SearchVisibleUser(
+        [FromQuery] string? query)
     {
-        var user = await getUserHandler.HandleAsync(new GetUserQuery{ UserId = userId });
+        var userId = User.GetUserIdOrThrow();
+
+        var users = await searchVisibleUsersHandler.HandleAsync(new SearchVisibleUsersQuery
+        {
+            RequestedUserId = userId,
+            Query = query
+        });
         
-        return user;
-    }
-
-    [HttpGet("{UserId:guid}/tasks")]
-    public async Task<ActionResult<UserWithTasksDto>> GetUserWithTasks([FromRoute] Guid userId)
-    {
-        var user = await getUserWithTasksHandler.HandleAsync(new GetUserWithTasksQuery{ UserId = userId });
-
-        return user;
-    }
-
-    [HttpGet("all")]
-    public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers(GetUsersQuery query)
-    {
-        return Ok(await getUsersHandler.HandleAsync(query));
+        return Ok(users);
     }
 }
