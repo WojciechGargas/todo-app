@@ -2,7 +2,7 @@
 using Todo.Core.ValueObjects;
 using Todo.Tests.Unit.Shared;
 
-namespace Todo.Tests.Unit.Core;
+namespace Todo.Tests.Unit.Core.User;
 
 public class UserCtorTests
 {
@@ -29,41 +29,5 @@ public class UserCtorTests
             () => Assert.Null(user.LastLoggedAtUtc),
             () => Assert.Empty(user.TaskIds)
         );
-    }
-    
-    [Fact]
-    public void Ctor_SetsProfileVisibilityToTrueByDefault()
-    {
-        //Arrange
-        var user = UsersTestData.CreateOwner();
-        
-        //Act
-        
-        //Assert
-        Assert.True(user.IsProfileVisibleForSharing);
-    }
-
-    [Fact]
-    public void Ctor_SetsIsEmailConfirmedToFalseByDefault()
-    {
-        //Arrange
-        var usuer = UsersTestData.CreateOwner();
-        
-        //Act
-        
-        //Assert
-        Assert.False(usuer.IsEmailConfirmed);
-    }
-
-    [Fact]
-    public void Ctor_InitializesTaskIdsAsEmptyList()
-    {
-        //Arrange
-        var user = UsersTestData.CreateOwner();
-        
-        //Act
-        
-        //Assert
-        Assert.Empty(user.TaskIds);
     }
 }
