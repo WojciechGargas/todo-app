@@ -11,7 +11,7 @@ public class UserTests
     {
         //Arrange
         var user = UsersTestData.CreateOwner();
-        var task = TaskTestData.CreateOwnedByOwner();
+        var task = TodoTaskTestData.CreateOwnedByOwner();
         
         //Act
         user.AddTask(task.TaskId);
@@ -26,7 +26,7 @@ public class UserTests
     {
         //Arrange
         var user = UsersTestData.CreateOwner();
-        var task = TaskTestData.CreateOwnedByOwner();
+        var task = TodoTaskTestData.CreateOwnedByOwner();
         user.AddTask(task.TaskId);
         
         //Act
@@ -42,7 +42,7 @@ public class UserTests
     {
         //Arrange
         var user = UsersTestData.CreateOwner();
-        var task = TaskTestData.CreateOwnedByOwner();
+        var task = TodoTaskTestData.CreateOwnedByOwner();
         user.AddTask(task.TaskId);
         
         //Act
@@ -68,7 +68,7 @@ public class UserTests
     }
 
     [Fact]
-    public void MarkEmailAsConfirmed_WhenCalled_SetsISEmailConfirmedToTrue()
+    public void MarkEmailAsConfirmed_WhenCalled_SetsIsEmailConfirmedToTrue()
     {
         //Arrange
         var user = UsersTestData.CreateOwner();
@@ -81,7 +81,7 @@ public class UserTests
     }
 
     [Fact]
-    public void ChangeEmail_WhenCalledWithValidData_UpdatesEmail()
+    public void ChangeEmail_WhenCalledWithValidData_UpdatesEmailAndResetsConfirmation()
     {
         //Arrange
         var user = UsersTestData.CreateOwner(isEmailConfirmed: true);

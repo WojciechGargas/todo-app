@@ -3,7 +3,7 @@ using Todo.Core.ValueObjects;
 
 namespace Todo.Tests.Unit.Shared;
 
-public static class TaskTestData
+public static class TodoTaskTestData
 {
     public static TodoTask CreateOwnedByOwner(
         Guid? taskId = null,
