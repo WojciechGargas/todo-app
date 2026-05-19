@@ -2,24 +2,19 @@
 
 namespace Todo.Core.Entities;
 
-public class TodoTask
+public class TodoTask(
+    TaskId taskId,
+    UserId ownerUserId,
+    TaskName taskName,
+    TaskDescription taskDescription)
 {
-    public TaskId TaskId {get; private set;}
-    public UserId OwnerUserId {get; private set;}
-    public TaskName TaskName { get; private set; }
-    public TaskDescription TaskDescription { get; private set; }
+    public TaskId TaskId {get; private set;} = taskId;
+    public UserId OwnerUserId {get; private set;} = ownerUserId;
+    public TaskName TaskName { get; private set; } = taskName;
+    public TaskDescription TaskDescription { get; private set; } = taskDescription;
     public bool IsCompleted { get; private set; }
 
-    public TodoTask(TaskId taskId, UserId ownerUserId, TaskName taskName,
-        TaskDescription taskDescription)
-    {
-        TaskId = taskId;
-        OwnerUserId = ownerUserId;
-        TaskName = taskName;
-        TaskDescription = taskDescription;
-    }
-    
-    
+
     public void ChangeName(string newName)
         => TaskName = new TaskName(newName);
     
