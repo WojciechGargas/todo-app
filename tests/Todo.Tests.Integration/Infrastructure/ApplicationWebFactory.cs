@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Testcontainers.PostgreSql;
+using Todo.Application.Email;
 using Todo.Application.Security;
 using Todo.Core.Abstractions;
 using Todo.Core.Entities;
@@ -27,6 +28,8 @@ public sealed class ApplicationWebFactory : WebApplicationFactory<Program>, IAsy
     private string? _connectionString;
     
     private TestClock Clock { get; } = new();
+    
+    public TestEmailConfirmationService TestEmailConfirmationService { get; private set; } = null!;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -45,6 +48,15 @@ public sealed class ApplicationWebFactory : WebApplicationFactory<Program>, IAsy
 
         builder.ConfigureTestServices(testServices =>
         {
+            testServices.RemoveAll<IEmailConfirmationService>();
+            testServices.AddSingleton<TestEmailConfirmationService>();
+            testServices.AddSingleton<IEmailConfirmationService>(sp =>
+            {
+                var svc = sp.GetRequiredService<TestEmailConfirmationService>();
+                TestEmailConfirmationService = svc;
+                return svc;
+            });
+            
             var descriptor = testServices.SingleOrDefault(
                 s => s.ServiceType == typeof(DbContextOptions<TodoDbContext>));
 
