@@ -17,11 +17,15 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
     [Fact]
     public async Task SignIn_WithValidCredentials_ReturnsJwtToken()
     {
-        //Act
-        var response = await SignInAsync("owner@test.com", "Secret123!");
+        // Arrange
+        const string email = "owner@test.com";
+        const string password = "Secret123!";
+
+        // Act
+        var response = await SignInAsync(email, password);
         var jwt = await response.Content.ReadFromJsonAsync<JwtDto>();
         
-        //Assert
+        // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(jwt);
         Assert.False(string.IsNullOrWhiteSpace(jwt.AccessToken));
@@ -30,10 +34,14 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
     [Fact]
     public async Task SignIn_WithInvalidCredentials_ReturnsBadRequestAndErrorPayload()
     {
-        //Act
-        var response = await SignInAsync("owner@test.com", "xxx");
+        // Arrange
+        const string email = "owner@test.com";
+        const string password = "xxx";
+
+        // Act
+        var response = await SignInAsync(email, password);
         
-        //Assert
+        // Assert
         var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
         Assert.NotNull(error);
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -44,9 +52,13 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
     [Fact]
     public async Task SignUp_WithValidData_ReturnsCreated_AndSendsConfirmationEmail()
     {
+        // Arrange
         var email = CreateUniqueEmail();
+
+        // Act
         var signupResponse = await SignUpAsync(email);
 
+        // Assert
         Assert.Equal(HttpStatusCode.Created, signupResponse.StatusCode);
         Assert.NotEmpty(factory.TestEmailConfirmationService.RegistrationEmails);
     }
@@ -54,33 +66,52 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
     [Fact]
     public async Task ConfirmEmail_WithValidToken_ReturnsNoContent()
     {
+        // Arrange - sign up
         var email = CreateUniqueEmail();
 
+        // Act - sign up
         var signupResponse = await SignUpAsync(email);
+
+        // Assert - sign up
         Assert.Equal(HttpStatusCode.Created, signupResponse.StatusCode);
 
+        // Arrange - confirm email
         var token = GetRegistrationToken(email);
+
+        // Act - confirm email
         var confirmResponse = await ConfirmEmailAsync(token);
 
+        // Assert - confirm email
         Assert.Equal(HttpStatusCode.NoContent, confirmResponse.StatusCode);
     }
 
     [Fact]
     public async Task SignIn_AfterEmailConfirmation_ReturnsOkAndJwt()
     {
+        // Arrange - test data
         var email = CreateUniqueEmail();
         const string password = "User123!";
 
+        // Act - sign up
         var signupResponse = await SignUpAsync(email, password);
+
+        // Assert - sign up
         Assert.Equal(HttpStatusCode.Created, signupResponse.StatusCode);
 
+        // Arrange - confirm email
         var token = GetRegistrationToken(email);
+
+        // Act - confirm email
         var confirmResponse = await ConfirmEmailAsync(token);
+
+        // Assert - confirm email
         Assert.Equal(HttpStatusCode.NoContent, confirmResponse.StatusCode);
 
+        // Act - sign in
         var signinResponse = await SignInAsync(email, password);
         var jwt = await signinResponse.Content.ReadFromJsonAsync<JwtDto>();
 
+        // Assert - sign in
         Assert.Equal(HttpStatusCode.OK, signinResponse.StatusCode);
         Assert.NotNull(jwt);
         Assert.False(string.IsNullOrWhiteSpace(jwt.AccessToken));
