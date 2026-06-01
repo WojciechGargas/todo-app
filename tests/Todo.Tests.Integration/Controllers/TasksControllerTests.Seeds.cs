@@ -29,8 +29,8 @@ public partial class TasksControllerTests
 
         db.TaskShares.Add(new TaskShare(
             new TaskId(sharedTaskId),
-            new UserId(OtherUserId),
             new UserId(OwnerUserId),
+            new UserId(OtherUserId),
             permission,
             now));
 
@@ -84,8 +84,8 @@ public partial class TasksControllerTests
 
         db.TaskShares.Add(new TaskShare(
             new TaskId(taskId),
-            new UserId(ownerId),
             new UserId(targetUserId),
+            new UserId(ownerId),
             permission,
             now));
 
