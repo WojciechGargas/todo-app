@@ -68,6 +68,7 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal("email_not_confirmed", error.Code);
     }
+    
     [Fact]
     public async Task SignIn_AfterEmailConfirmation_ReturnsOkAndJwt()
     {
@@ -118,6 +119,25 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal("username_already_in_use", error.Code);
     }
+
+
+    [Theory]
+    [InlineData("test@com")]
+    [InlineData("test@domain.c")]
+    [InlineData("te st@test.com")]
+    [InlineData(" test@test.com")]
+    [InlineData("test@test.com ")] 
+    public async Task SignUp_WithInvalidEmailFormat_ReturnsBadRequestAndErrorPayload(string email)
+    {
+        //Act
+        var response = await SignUpAsync(email :email);
+        
+        //Assert
+        var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        Assert.NotNull(error);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("invalid_email", error.Code);
+    }
     
     [Fact]
     public async Task SignUp_WithDuplicateEmail_ReturnsBadRequestAndErrorPayload()
@@ -135,6 +155,39 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
         Assert.Equal("email_already_in_use", error.Code);
     }
 
+    [Theory]
+    [InlineData("")]
+    [InlineData("xxx")]
+    [InlineData("abcdefghijklmnopqrstuvwxyz" +
+                "abcdefghijklmnopqrstuvwxyz" +
+                "abcdefghijklmnopqrstuvwxyz" +
+                "abcdefghijklmnopqrstuvwxyz")]
+    public async Task SignUp_WithInvalidPasswordLength_ReturnsBadRequestAndErrorPayload(string invalidPassword)
+    {
+        // Act
+        var response = await SignUpAsync(password: invalidPassword);
+        
+        //Assert
+        var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        Assert.NotNull(error);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("invalid_password", error.Code);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("abcdefghijklmnopqrstuvwxyz")]
+    public async Task SignUp_WithInvalidUsernameLength_ReturnsBadRequestAndErrorPayload(string invalidUsername)
+    {
+        // Act
+        var response = await SignUpAsync(username: invalidUsername);
+        
+        //Assert
+        var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        Assert.NotNull(error);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("invalid_username", error.Code);
+    }
     [Fact]
     public async Task ConfirmEmail_WithValidToken_ReturnsNoContent()
     {
