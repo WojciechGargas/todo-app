@@ -224,6 +224,37 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal("invalid_email_confirmation_token", error.Code);
     }
+    
+    [Fact]
+    public async Task ConfirmEmailFromLink_WithValidToken_ReturnsOkAndSuccessMessage()
+    {
+        // Arrange
+        var email = CreateUniqueEmail();
+        var signupResponse = await SignUpAsync(email);
+        Assert.Equal(HttpStatusCode.Created, signupResponse.StatusCode);
+        var token = GetRegistrationToken(email);
+
+        // Act
+        var response = await _backend.GetAsync($"/auth/confirm-email?token={Uri.EscapeDataString(token)}");
+        var content = await response.Content.ReadAsStringAsync();
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("Email confirmed. You can close this page.", content);
+    }
+
+    [Fact]
+    public async Task ConfirmEmailFromLink_WithInvalidToken_ReturnsBadRequestAndErrorPayload()
+    {
+        // Act
+        var response = await _backend.GetAsync("/auth/confirm-email?token=invalid-token");
+
+        // Assert
+        var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        Assert.NotNull(error);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("invalid_email_confirmation_token", error.Code);
+    }
 
     [Fact]
     public async Task Logout_WithValidToken_ReturnsNoContent()
@@ -251,6 +282,45 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
 
         // Assert
         Assert.Equal(HttpStatusCode.NoContent, logoutResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task Logout_WithInvalidToken_ReturnsUnauthorized()
+    {
+        // Arrange
+        _backend.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "invalid-token");
+
+        // Act
+        var logoutResponse = await _backend.PostAsync("/auth/logout", content: null);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, logoutResponse.StatusCode);
+    }
+    
+    [Fact]
+    public async Task Logout_WithoutToken_ReturnsUnauthorized()
+    {
+        // Arrange
+        var email = CreateUniqueEmail();
+        const string password = "User123!";
+
+        var (signUpResponse, confirmResponse) = await SignUpAndConfirmAsync(email, password);
+        Assert.Equal(HttpStatusCode.Created, signUpResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, confirmResponse.StatusCode);
+
+        var signInResponse = await SignInAsync(email, password);
+        Assert.Equal(HttpStatusCode.OK, signInResponse.StatusCode);
+
+        var jwt = await signInResponse.Content.ReadFromJsonAsync<JwtDto>();
+        Assert.NotNull(jwt);
+        Assert.False(string.IsNullOrWhiteSpace(jwt.AccessToken));
+        
+        // Act
+        var logoutResponse = await _backend.PostAsync("/auth/logout", content: null);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, logoutResponse.StatusCode);
     }
 
     [Fact]
@@ -323,7 +393,7 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
     private async Task<(HttpResponseMessage SignUpResponse, HttpResponseMessage ConfirmResponse)>
         SignUpAndConfirmAsync(string email, string password = "User123!")
     {
-        var signUpResponse = await SignUpAsync(email, password);
+        var signUpResponse = await SignUpAsync(email: email, password: password);
         var token = GetRegistrationToken(email);
         var confirmResponse = await ConfirmEmailAsync(token);
 
