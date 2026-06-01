@@ -22,7 +22,7 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
         const string password = "Secret123!";
 
         // Act
-        var response = await SignInAsync(email, password);
+        var response = await IntegrationAuthHelper.SignInAsync(_backend, email, password);
         var jwt = await response.Content.ReadFromJsonAsync<JwtDto>();
         
         // Assert
@@ -39,7 +39,7 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
         const string password = "xxx";
 
         // Act
-        var response = await SignInAsync(email, password);
+        var response = await IntegrationAuthHelper.SignInAsync(_backend, email, password);
         
         // Assert
         var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
@@ -60,7 +60,7 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
         Assert.Equal(HttpStatusCode.Created, signupResponse.StatusCode);
         
         // Act
-        var response = await SignInAsync(email, password);
+        var response = await IntegrationAuthHelper.SignInAsync(_backend, email, password);
         
         // Assert
         var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
@@ -80,7 +80,7 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
         Assert.Equal(HttpStatusCode.NoContent, confirmResponse.StatusCode);
 
         // Act
-        var response = await SignInAsync(email, password);
+        var response = await IntegrationAuthHelper.SignInAsync(_backend, email, password);
         var jwt = await response.Content.ReadFromJsonAsync<JwtDto>();
 
         // Assert
@@ -267,15 +267,14 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
         Assert.Equal(HttpStatusCode.Created, signUpResponse.StatusCode);
         Assert.Equal(HttpStatusCode.NoContent, confirmResponse.StatusCode);
 
-        var signInResponse = await SignInAsync(email, password);
+        var signInResponse = await IntegrationAuthHelper.SignInAsync(_backend, email, password);
         Assert.Equal(HttpStatusCode.OK, signInResponse.StatusCode);
 
         var jwt = await signInResponse.Content.ReadFromJsonAsync<JwtDto>();
         Assert.NotNull(jwt);
         Assert.False(string.IsNullOrWhiteSpace(jwt.AccessToken));
 
-        _backend.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwt.AccessToken);
+        IntegrationAuthHelper.SetBearerToken(_backend, jwt.AccessToken);
 
         // Act
         var logoutResponse = await _backend.PostAsync("/auth/logout", content: null);
@@ -288,8 +287,7 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
     public async Task Logout_WithInvalidToken_ReturnsUnauthorized()
     {
         // Arrange
-        _backend.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "invalid-token");
+        IntegrationAuthHelper.SetBearerToken(_backend, "invalid-token");
 
         // Act
         var logoutResponse = await _backend.PostAsync("/auth/logout", content: null);
@@ -309,7 +307,7 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
         Assert.Equal(HttpStatusCode.Created, signUpResponse.StatusCode);
         Assert.Equal(HttpStatusCode.NoContent, confirmResponse.StatusCode);
 
-        var signInResponse = await SignInAsync(email, password);
+        var signInResponse = await IntegrationAuthHelper.SignInAsync(_backend, email, password);
         Assert.Equal(HttpStatusCode.OK, signInResponse.StatusCode);
 
         var jwt = await signInResponse.Content.ReadFromJsonAsync<JwtDto>();
@@ -334,15 +332,14 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
         Assert.Equal(HttpStatusCode.Created, signUpResponse.StatusCode);
         Assert.Equal(HttpStatusCode.NoContent, confirmResponse.StatusCode);
 
-        var signInResponse = await SignInAsync(email, password);
+        var signInResponse = await IntegrationAuthHelper.SignInAsync(_backend, email, password);
         Assert.Equal(HttpStatusCode.OK, signInResponse.StatusCode);
 
         var jwt = await signInResponse.Content.ReadFromJsonAsync<JwtDto>();
         Assert.NotNull(jwt);
         Assert.False(string.IsNullOrWhiteSpace(jwt.AccessToken));
 
-        _backend.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwt.AccessToken);
+        IntegrationAuthHelper.SetBearerToken(_backend, jwt.AccessToken);
 
         var logoutResponse = await _backend.PostAsync("/auth/logout", content: null);
         Assert.Equal(HttpStatusCode.NoContent, logoutResponse.StatusCode);
@@ -387,9 +384,6 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
     private Task<HttpResponseMessage> ConfirmEmailAsync(string token) =>
         _backend.PostAsJsonAsync("/auth/confirm-email", new { token });
 
-    private Task<HttpResponseMessage> SignInAsync(string email, string password) =>
-        _backend.PostAsJsonAsync("/auth/sign-in", new { email, password });
-    
     private async Task<(HttpResponseMessage SignUpResponse, HttpResponseMessage ConfirmResponse)>
         SignUpAndConfirmAsync(string email, string password = "User123!")
     {

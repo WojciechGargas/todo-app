@@ -27,7 +27,7 @@ public sealed class ApplicationWebFactory : WebApplicationFactory<Program>, IAsy
     
     private string? _connectionString;
     
-    private TestClock Clock { get; } = new();
+    internal TestClock Clock { get; } = new();
     
     public TestEmailConfirmationService TestEmailConfirmationService { get; private set; } = null!;
 

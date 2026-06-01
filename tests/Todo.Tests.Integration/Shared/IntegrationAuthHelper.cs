@@ -1,0 +1,28 @@
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using Todo.Application.DTO;
+
+namespace Todo.Tests.Integration.Shared;
+
+internal static class IntegrationAuthHelper
+{
+    public static Task<HttpResponseMessage> SignInAsync(HttpClient client, string email, string password)
+        => client.PostAsJsonAsync("/auth/sign-in", new { email, password });
+
+    public static void SetBearerToken(HttpClient client, string accessToken)
+        => client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+    public static void ClearBearerToken(HttpClient client)
+        => client.DefaultRequestHeaders.Authorization = null;
+
+    public static async Task<JwtDto> ReadJwtOrThrowAsync(HttpResponseMessage response)
+    {
+        var jwt = await response.Content.ReadFromJsonAsync<JwtDto>();
+        if (jwt is null || string.IsNullOrWhiteSpace(jwt.AccessToken))
+        {
+            throw new InvalidOperationException("JWT token was not returned in sign-in response.");
+        }
+
+        return jwt;
+    }
+}
