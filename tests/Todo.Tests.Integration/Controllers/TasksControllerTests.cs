@@ -187,4 +187,120 @@ public partial class TasksControllerTests(ApplicationWebFactory factory) : IClas
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal("invalid_task_description", error.Code);
     }
+
+    [Fact]
+    public async Task UpdateTaskName_WhenOwner_ReturnsNoContentAndUpdatesTaskName()
+    {
+        //Arrange
+        await IntegrationAuthHelper.SignInAndSetBearerTokenAsync
+            (_backend, "owner@test.com", "Secret123!");
+        
+        var ownerTaskId = await SeedTaskForUserAsync(
+            OwnerUserId,
+            name: "Owner task",
+            description: "Owned by owner");
+
+        var request = new
+        {
+            name = "Updated name"
+        };
+        
+        // Act
+        var response = await _backend.PatchAsJsonAsync($"/tasks/updateTask/{ownerTaskId}", request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        using var scope = factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<TodoDbContext>();
+        var task = await db.TodoTasks.FirstOrDefaultAsync(t =>t.TaskId == new TaskId(ownerTaskId));
+        
+        //Assert
+        Assert.NotNull(task);
+        Assert.Equal(new TaskName("Updated name"), task.TaskName);
+    }
+
+    [Fact]
+    public async Task UpdateTaskName_WhenNotOwnerAndNotShared_ReturnsForbidden()
+    {
+        //Arrange
+        await IntegrationAuthHelper.SignInAndSetBearerTokenAsync
+            (_backend, "owner@test.com", "Secret123!");
+        
+        var otherUsersTaskId = await SeedTaskForUserAsync(
+            OtherUserId,
+            name: "Other user task",
+            description: "Owned by other user");
+
+        var request = new
+        {
+            name = "Updated name"
+        };
+        
+        //Act
+        var response = await _backend.PatchAsJsonAsync($"/tasks/updateTask/{otherUsersTaskId}", request);
+        
+        //Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        Assert.NotNull(error);
+        Assert.Equal("forbidden", error.Code);
+    }
+    
+    [Fact]
+    public async Task UpdateTaskDescription_WhenOwner_ReturnsNoContentAndUpdatesTaskDescription()
+    {
+        //Arrange
+        await IntegrationAuthHelper.SignInAndSetBearerTokenAsync
+            (_backend, "owner@test.com", "Secret123!");
+        
+        var ownerTaskId = await SeedTaskForUserAsync(
+            OwnerUserId,
+            name: "Owner task",
+            description: "Owned by owner");
+
+        var request = new
+        {
+            description = "Updated description"
+        };
+        
+        // Act
+        var response = await _backend.PatchAsJsonAsync($"/tasks/updateTask/{ownerTaskId}", request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        using var scope = factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<TodoDbContext>();
+        var task = await db.TodoTasks.FirstOrDefaultAsync(t =>t.TaskId == new TaskId(ownerTaskId));
+        
+        //Assert
+        Assert.NotNull(task);
+        Assert.Equal(new TaskDescription("Updated description"), task.TaskDescription);
+    }
+    
+    [Fact]
+    public async Task UpdateTaskDescription_WhenNotOwnerAndNotShared_ReturnsForbidden()
+    {
+        //Arrange
+        await IntegrationAuthHelper.SignInAndSetBearerTokenAsync
+            (_backend, "owner@test.com", "Secret123!");
+        
+        var otherUsersTaskId = await SeedTaskForUserAsync(
+            OtherUserId,
+            name: "Other user task",
+            description: "Owned by other user");
+
+        var request = new
+        {
+            description = "Updated description"
+        };
+        
+        //Act
+        var response = await _backend.PatchAsJsonAsync($"/tasks/updateTask/{otherUsersTaskId}", request);
+        
+        //Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        Assert.NotNull(error);
+        Assert.Equal("forbidden", error.Code);
+    }
 }
