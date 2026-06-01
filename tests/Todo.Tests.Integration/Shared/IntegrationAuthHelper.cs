@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Todo.Application.DTO;
@@ -24,5 +25,22 @@ internal static class IntegrationAuthHelper
         }
 
         return jwt;
+    }
+    
+    public static async Task<string> SignInAndSetBearerTokenAsync(
+        HttpClient client,
+        string email,
+        string password)
+    {
+        var signInResponse = await SignInAsync(client, email, password);
+        if (signInResponse.StatusCode != HttpStatusCode.OK)
+        {
+            throw new InvalidOperationException($"Sign-in failed with status code: {signInResponse.StatusCode}");
+        }
+
+        var jwt = await ReadJwtOrThrowAsync(signInResponse);
+        SetBearerToken(client, jwt.AccessToken);
+
+        return jwt.AccessToken;
     }
 }

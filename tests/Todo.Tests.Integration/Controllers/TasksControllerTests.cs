@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Todo.Application.DTO;
 using Todo.Core.Entities;
@@ -8,6 +9,7 @@ using Todo.Core.ValueObjects;
 using Todo.Infrastructure.DAL;
 using Todo.Tests.Integration.Infrastructure;
 using Todo.Tests.Integration.Shared;
+using Xunit.Sdk;
 
 namespace Todo.Tests.Integration.Controllers;
 
@@ -39,13 +41,8 @@ public partial class TasksControllerTests(ApplicationWebFactory factory) : IClas
         var (ownerTaskId, otherUserTaskId, sharedTaskId) = 
             await SeedMixedTasksAsync(TaskSharePermission.Read);
 
-        var signInResponse = await IntegrationAuthHelper.SignInAsync
+        await IntegrationAuthHelper.SignInAndSetBearerTokenAsync
             (_backend, "owner@test.com", "Secret123!");
-        Assert.Equal(HttpStatusCode.OK, signInResponse.StatusCode);
-
-        var jwt = await signInResponse.Content.ReadFromJsonAsync<JwtDto>();
-        Assert.NotNull(jwt);
-        IntegrationAuthHelper.SetBearerToken(_backend, jwt.AccessToken);
 
         // Act
         var response = await _backend.GetAsync("/tasks/tasks");
@@ -69,13 +66,8 @@ public partial class TasksControllerTests(ApplicationWebFactory factory) : IClas
             name: "Owner task",
             description: "Owned by owner");
 
-        var signInResponse = await IntegrationAuthHelper.SignInAsync
+        await IntegrationAuthHelper.SignInAndSetBearerTokenAsync
             (_backend, "owner@test.com", "Secret123!");
-        Assert.Equal(HttpStatusCode.OK, signInResponse.StatusCode);
-
-        var jwt = await signInResponse.Content.ReadFromJsonAsync<JwtDto>();
-        Assert.NotNull(jwt);
-        IntegrationAuthHelper.SetBearerToken(_backend, jwt.AccessToken);
 
         // Act
         var response = await _backend.GetAsync($"/tasks/{ownerTaskId}");
@@ -95,12 +87,8 @@ public partial class TasksControllerTests(ApplicationWebFactory factory) : IClas
         // Arrange
         var (ownerTaskId, otherTaskId, sharedTaskId) = await SeedMixedTasksAsync(TaskSharePermission.Read);
 
-        var signInResponse = await IntegrationAuthHelper.SignInAsync(_backend, "owner@test.com", "Secret123!");
-        Assert.Equal(HttpStatusCode.OK, signInResponse.StatusCode);
-
-        var jwt = await signInResponse.Content.ReadFromJsonAsync<JwtDto>();
-        Assert.NotNull(jwt);
-        IntegrationAuthHelper.SetBearerToken(_backend, jwt.AccessToken);
+        await IntegrationAuthHelper.SignInAndSetBearerTokenAsync
+            (_backend, "owner@test.com", "Secret123!");
 
         // Act
         var response = await _backend.GetAsync("/tasks/tasksWithShared");
@@ -113,5 +101,90 @@ public partial class TasksControllerTests(ApplicationWebFactory factory) : IClas
         Assert.Contains(tasks, t => t.Id.Value == ownerTaskId);
         Assert.Contains(tasks, t => t.Id.Value == sharedTaskId);
         Assert.DoesNotContain(tasks, t => t.Id.Value == otherTaskId);
+    }
+    
+    [Fact]
+    public async Task AddTask_WithValidRequest_ReturnsOkAndAddsTask()
+    {
+        // Arrange
+        await IntegrationAuthHelper.SignInAndSetBearerTokenAsync
+            (_backend, "owner@test.com", "Secret123!");
+
+        var request = new
+        {
+            name = "New Task",
+            description = "Created from integration test"
+        };
+        
+        //Act
+        var response = await _backend.PostAsJsonAsync("/tasks/addTask", request);
+        
+        //Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode); 
+        using var scope = factory.Server.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<TodoDbContext>();
+        
+        var exists = await db.TodoTasks.AnyAsync(t =>
+            t.OwnerUserId == new UserId(OwnerUserId) &&
+            t.TaskName == new TaskName("New Task") && 
+            t.TaskDescription == new TaskDescription("Created from integration test"));
+        
+        Assert.True(exists);
+    }
+    
+    [Theory]
+    [InlineData("")]
+    [InlineData("abcdefghijklmnopqrstuvwxyz" +
+                "abcdefghijklmnopqrstuvwxyz" +
+                "abcdefghijklmnopqrstuvwxyz" +
+                "abcdefghijklmnopqrstuvwxyz")]
+    public async Task AddTask_WithInvalidName_ReturnsBadRequest(string invalidName)
+    {
+        // Arrange
+        await IntegrationAuthHelper.SignInAndSetBearerTokenAsync
+            (_backend, "owner@test.com", "Secret123!");
+
+        var request = new
+        {
+            name = invalidName,
+            description = "Valid description"
+        };
+        
+        //Act
+        var response = await _backend.PostAsJsonAsync("/tasks/addTask", request);
+        
+        //Assert
+        var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        Assert.NotNull(error);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("invalid_todo_task_name", error.Code);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("abcdefghijklmnopqrstuvwxyz" +
+                "abcdefghijklmnopqrstuvwxyz" +
+                "abcdefghijklmnopqrstuvwxyz" +
+                "abcdefghijklmnopqrstuvwxyz")]
+    public async Task AddTask_WithInvalidDescription_ReturnsBadRequest(string invalidDescription)
+    {
+        // Arrange
+        await IntegrationAuthHelper.SignInAndSetBearerTokenAsync
+            (_backend, "owner@test.com", "Secret123!");
+        
+        var request = new
+        {
+            name = "Valid name",
+            description = invalidDescription
+        };
+        
+        //Act
+        var response = await _backend.PostAsJsonAsync("/tasks/addTask", request);
+        
+        //Assert
+        var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        Assert.NotNull(error);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("invalid_task_description", error.Code);
     }
 }
