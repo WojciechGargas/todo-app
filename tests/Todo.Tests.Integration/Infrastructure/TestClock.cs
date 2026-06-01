@@ -4,6 +4,11 @@ namespace Todo.Tests.Integration.Infrastructure;
 
 internal sealed class TestClock : IClock
 {
-    private DateTime CurrentTime { get; set; } = new (2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
-    public DateTime CurrentTimeUtc() => CurrentTime;
+    private DateTime _currentTime = DateTime.UtcNow;
+
+    public DateTime CurrentTimeUtc() => _currentTime;
+
+    public void Set(DateTime utcDateTime) => _currentTime = utcDateTime;
+
+    public void Advance(TimeSpan by) => _currentTime = _currentTime.Add(by);
 }

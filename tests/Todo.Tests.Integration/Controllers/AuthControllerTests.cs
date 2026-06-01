@@ -119,8 +119,7 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal("username_already_in_use", error.Code);
     }
-
-
+    
     [Theory]
     [InlineData("test@com")]
     [InlineData("test@domain.c")]
@@ -188,6 +187,7 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal("invalid_username", error.Code);
     }
+    
     [Fact]
     public async Task ConfirmEmail_WithValidToken_ReturnsNoContent()
     {
@@ -202,6 +202,86 @@ public class AuthControllerTests(ApplicationWebFactory factory) : IClassFixture<
 
         // Assert
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ConfirmEmail_WithInvalidToken_ReturnsBadRequestAndErrorPayload()
+    {
+        // Arrange
+        var email = CreateUniqueEmail();
+        var signupResponse = await SignUpAsync(email);
+        Assert.Equal(HttpStatusCode.Created, signupResponse.StatusCode);
+        
+        var validToken = GetRegistrationToken(email);
+        var invalidToken = $"{validToken}x"; 
+        
+        //Act
+        var response = await ConfirmEmailAsync(invalidToken);
+        
+        //Assert
+        var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        Assert.NotNull(error);
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("invalid_email_confirmation_token", error.Code);
+    }
+
+    [Fact]
+    public async Task Logout_WithValidToken_ReturnsNoContent()
+    {
+        // Arrange
+        var email = CreateUniqueEmail();
+        const string password = "User123!";
+
+        var (signUpResponse, confirmResponse) = await SignUpAndConfirmAsync(email, password);
+        Assert.Equal(HttpStatusCode.Created, signUpResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, confirmResponse.StatusCode);
+
+        var signInResponse = await SignInAsync(email, password);
+        Assert.Equal(HttpStatusCode.OK, signInResponse.StatusCode);
+
+        var jwt = await signInResponse.Content.ReadFromJsonAsync<JwtDto>();
+        Assert.NotNull(jwt);
+        Assert.False(string.IsNullOrWhiteSpace(jwt.AccessToken));
+
+        _backend.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwt.AccessToken);
+
+        // Act
+        var logoutResponse = await _backend.PostAsync("/auth/logout", content: null);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NoContent, logoutResponse.StatusCode);
+    }
+
+    [Fact]
+    public async Task AccessProtectedEndpoint_WithRevokedToken_ReturnsUnauthorized()
+    {
+        // Arrange
+        var email = CreateUniqueEmail();
+        const string password = "User123!";
+
+        var (signUpResponse, confirmResponse) = await SignUpAndConfirmAsync(email, password);
+        Assert.Equal(HttpStatusCode.Created, signUpResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, confirmResponse.StatusCode);
+
+        var signInResponse = await SignInAsync(email, password);
+        Assert.Equal(HttpStatusCode.OK, signInResponse.StatusCode);
+
+        var jwt = await signInResponse.Content.ReadFromJsonAsync<JwtDto>();
+        Assert.NotNull(jwt);
+        Assert.False(string.IsNullOrWhiteSpace(jwt.AccessToken));
+
+        _backend.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwt.AccessToken);
+
+        var logoutResponse = await _backend.PostAsync("/auth/logout", content: null);
+        Assert.Equal(HttpStatusCode.NoContent, logoutResponse.StatusCode);
+
+        // Act
+        var protectedResponse = await _backend.GetAsync("/tasks/tasks");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, protectedResponse.StatusCode);
     }
 
     private Task<HttpResponseMessage> SignUpAsync(
